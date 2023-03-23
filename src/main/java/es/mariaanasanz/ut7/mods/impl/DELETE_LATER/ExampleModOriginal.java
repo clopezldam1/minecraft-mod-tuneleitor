@@ -24,7 +24,7 @@ import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/mods.toml file
-@Mod(ExampleModOriginal.MODID)
+//@Mod(ExampleModOriginal.MODID)
 public class ExampleModOriginal
 {
     // Define mod id in a common place for everything to reference
