@@ -1,4 +1,4 @@
-package es.mariaanasanz.ut7.mods.impl;
+package es.mariaanasanz.ut7.mods.impl.DELETE_LATER;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;

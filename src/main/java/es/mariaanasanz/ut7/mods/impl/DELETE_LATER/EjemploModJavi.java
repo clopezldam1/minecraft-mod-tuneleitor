@@ -1,4 +1,4 @@
-package es.mariaanasanz.ut7.mods.impl;
+package es.mariaanasanz.ut7.mods.impl.DELETE_LATER;
 
 import es.mariaanasanz.ut7.mods.base.*;
 import net.minecraft.core.BlockPos;
@@ -17,11 +17,14 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+
 @Mod(DamMod.MOD_ID)
 public class EjemploModJavi extends DamMod implements IBlockBreakEvent, IServerStartEvent,
         IItemPickupEvent, ILivingDamageEvent, IUseItemEvent, IFishedEvent,
         IInteractEvent, IMovementEvent {
-
+    
+   // public static final String MODID = "Tuneleitor"; //para que el mod aparezca en la pestaña de mods con su nombre
+    
     public EjemploModJavi(){
         super();
     }
@@ -54,19 +57,21 @@ public class EjemploModJavi extends DamMod implements IBlockBreakEvent, IServerS
     @Override
     @SubscribeEvent
     public void onLivingDamage(LivingDamageEvent event) {
-        System.out.println("evento LivingDamageEvent invocado "+event.getEntity().getClass()+" provocado por "+event.getSource().getEntity());
+        System.out.println("evento LivingDamageEvent invocado "+event.getEntity().getClass()+
+                " provocado por "+event.getSource().getEntity());
     }
 
     @Override
     @SubscribeEvent
     public void onLivingDeath(LivingDeathEvent event) {
-        System.out.println("evento LivingDeathEvent invocado "+event.getEntity().getClass()+" provocado por "+event.getSource().getEntity());
+        System.out.println("evento LivingDeathEvent invocado "+event.getEntity().getClass()+
+                " provocado por "+event.getSource().getEntity());
 
     }
 
     @Override
     @SubscribeEvent
-    public void onUseItem(LivingEntityUseItemEvent event) {
+    public void onUseItem(LivingEntityUseItemEvent event) { //SOLO VALE PARA CUANDO MOBS USAN UN ITEM (ej. Skeleton shoots bow)
         LOGGER.info("evento LivingEntityUseItemEvent invocado "+event.getEntity().getClass());
     }
 
@@ -98,16 +103,16 @@ public class EjemploModJavi extends DamMod implements IBlockBreakEvent, IServerS
     public void onPlayerWalk(MovementInputUpdateEvent event) {
         if(event.getEntity() instanceof Player){
             if(event.getInput().down){
-                System.out.println("down"+event.getInput().down);
+                System.out.println("down "+event.getInput().down);
             }
             if(event.getInput().up){
-                System.out.println("up"+event.getInput().up);
+                System.out.println("up "+event.getInput().up);
             }
             if(event.getInput().right){
-                System.out.println("right"+event.getInput().right);
+                System.out.println("right "+event.getInput().right);
             }
             if(event.getInput().left){
-                System.out.println("left"+event.getInput().left);
+                System.out.println("left "+event.getInput().left);
             }
         }
     }

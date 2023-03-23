@@ -17,11 +17,25 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+/**
+ * TUNELEITOR:
+ *
+ * Crea un mod que permita al jugador generar un túnel desde la posición
+ *  en la que se encuentra hasta el nivel 5 del suelo.
+ * Para ello, el jugador deberá interactuar con UN PICO en un trozo de tierra
+ *  (es decir, hacer click derecho sobre un trozo de tierra).
+ * El túnel deberá ir descendiendo con escaleras o simplemente
+ *  con diferencias de 1 altura hasta llegar al nivel 5.
+ * La altura del túnel deberá ser de 4 y la anchura de 3.
+ * Deberás recubrir el túnel (es decir, las paredes y techo) con cristal.
+ * ¡Cuidado! Los bloques que destruyas para generar el túnel no deberán dropearse.
+ */
 @Mod(DamMod.MOD_ID)
 public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStartEvent,
         IItemPickupEvent, ILivingDamageEvent, IUseItemEvent, IFishedEvent,
         IInteractEvent, IMovementEvent {
 
+    
     public Tuneleitor(){
         super();
     }
@@ -54,15 +68,13 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
     @Override
     @SubscribeEvent
     public void onLivingDamage(LivingDamageEvent event) {
-        System.out.println("evento LivingDamageEvent invocado "+event.getEntity().getClass()+
-                " provocado por "+event.getSource().getEntity());
+        System.out.println("evento LivingDamageEvent invocado "+event.getEntity().getClass()+" provocado por "+event.getSource().getEntity());
     }
 
     @Override
     @SubscribeEvent
     public void onLivingDeath(LivingDeathEvent event) {
-        System.out.println("evento LivingDeathEvent invocado "+event.getEntity().getClass()+
-                " provocado por "+event.getSource().getEntity());
+        System.out.println("evento LivingDeathEvent invocado "+event.getEntity().getClass()+" provocado por "+event.getSource().getEntity());
 
     }
 
@@ -70,6 +82,7 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
     @SubscribeEvent
     public void onUseItem(LivingEntityUseItemEvent event) {
         LOGGER.info("evento LivingEntityUseItemEvent invocado "+event.getEntity().getClass());
+        System.out.println("has utilzado el item " + event.getItem());
     }
 
 
@@ -112,5 +125,22 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                 System.out.println("left "+event.getInput().left);
             }
         }
+    }
+    
+    @SubscribeEvent
+    public void onPlayerUseItem(PlayerInteractEvent.RightClickBlock event){ //ej. cuando jugador usa el pico (right-click)
+        System.out.println("¡Has usado un objeto! OBJETO:" + event.getUseItem().name());
+        
+        BlockPos pos = event.getPos();
+        System.out.println("[BlockPos] la posicion del bloque afectado es: " + pos);
+        
+        BlockState state = event.getLevel().getBlockState(pos);
+        System.out.println("[BlockState] El estado del bloque afectado ahora es: " + state);
+        
+        Player player = event.getEntity();
+        System.out.println("[Player] El jugador es: " + player);
+        
+        ItemStack heldItem = player.getMainHandItem();
+        System.out.println("[ItemStack] El item que sostiene el jugador es:  " + heldItem);
     }
 }
