@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShovelItem;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.event.MovementInputUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -98,58 +99,66 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
     public void onPlayerTouch(PlayerInteractEvent.RightClickBlock event) {
         System.out.println("¡Has hecho click derecho! {ONCE}");
         
+        //original variables:
         BlockPos pos = event.getPos();
         BlockState state = event.getLevel().getBlockState(pos);
         Player player = event.getEntity();
         ItemStack heldItem = player.getMainHandItem();
+        //my variables:
+        Level world = event.getLevel();
         
-        if (ItemStack.EMPTY.equals(heldItem)) {
+        //original 'if' code:
+        if (ItemStack.EMPTY.equals(heldItem)) { //ItemStack es un Enum que guarda todos los objetos existentes en el juego (empty = air = null)
             System.out.println("La mano esta vacia");
             if (state.getBlock().getName().getString().trim().toLowerCase().endsWith("log")) {
                 System.out.println("¡Has hecho click sobre un tronco!");
             }
         }
-    
-        System.out.println("[event.getUseItem()]¡Has usado un objeto! OBJETO:" + event.getUseItem()+ "\n"+
+        
+        //my souts:
+        System.out.println("[PlayerInteractEvent.RightClickBlock] Saber información generica sobre el evento: "+"\n"+
                                 "\t"+"¿Ese objeto usado es una PALA (de cualquier tipo)? == " + event.getItemStack().getItem().toString().trim().endsWith("shovel")+"\n"+
-                                "\t"+"event.getPos() == " + event.getPos() +"\n"+
-                                "\t"+"event.getLevel() == "+ event.getLevel() +"\n"+
-                                "\t"+"event.getUseBlock() == "+event.getUseBlock() +"\n"+
-                                "\t"+"[event.getItemStack()] CUAL FUE EL OBJETO USADO == "+ event.getItemStack() +"\n"+
-                                "\t"+"[returns: InteractionHand // event.getHand()] QUE MANO HA SIDO USADA PARA LA ACCION == "+ event.getHand() +"\n"
+                                "\t"+"EL NOMBRE DEL OBJETO USADO (con toString y trim): " + event.getItemStack().getItem().toString().trim() +"\n"+
+                                "\t"+"Saber la posición del bloque afectado y si ese bloque puede transformarse (aka, is it mutable? where is it?): " + event.getPos() +"\n"+
+                                "\t"+"Obtener el nombre del mundo en el que se realizó la acción (aka, world file name): "+ event.getLevel() +"\n"+
+                                "\t"+"Saber que objeto ha sido usado para la acción y qué cantidad: "+ event.getItemStack() +"\n"+
+                                "\t"+"Saber con que mano has realizado la acción [returns: InteractionHand]: "+ event.getHand() +"\n"
 //                                "\t"+"" +"\n"+
                             );
         
-        System.out.println("[BlockPos] la posicion del bloque afectado es: " + pos);
+        System.out.println("[BlockPos] la posicion del bloque afectado es (aka, pos del targeted block):  " + pos +"\n");
         
-        System.out.println("[BlockState] El estado ANTERIOR del bloque que ha sido afectado ES (aka, WHICH BLOCK WAS TARGETED?): " + state + "\n"+
-                                "\t"+"Nombre ANTERIOR del bloque afectado: "+state.getBlock() +"\n"+
-                                "\t"+"state.getMaterial() == "+ state.getMaterial() +"\n"
+        System.out.println("[BlockState] El estado ANTERIOR del bloque que ha sido afectado ES (aka, WHICH BLOCK WAS TARGETED?): (state.?)" + state + "\n"+
+                                "\t"+"Nombre ANTERIOR del bloque afectado (aka, name del targeted block): "+state.getBlock() +"\n"
 //                                "\t"+"" +"\n"+
                             );
         
-        System.out.println("[Player] La información sobre el jugador es: (player) " + "\n"+
-                                "\t"+"Nombre jugador == " + player.getName() + "\n"+
-                                "\t"+"Objeto que jugador lleva en mano DERECHA(MAIN_HAND) "+player.getMainHandItem() +"\n"+
-                                "\t"+"ver que tiene en los handSlots: "+player.getHandSlots() +"\n"+
-                                "\t"+"player.getBlockX() == "+player.getBlockX() +"\n"+
-                                "\t"+"player.getBlockY() == "+player.getBlockY() +"\n"+
-                                "\t"+"player.getBlockZ() == "+player.getBlockZ() +"\n"+
-                                "\t"+"saber en que posicion está el bloque where im standing: "+player.getOnPos() +"\n"+
-                                "\t"+"player.position() == "+player.position() +"\n"+
-                                "\t"+"player.getUseItem() == "+player.getUseItem() +"\n"+
-                                "\t"+"player.isHolding(event.getItemStack().getItem()) == "+player.isHolding(event.getItemStack().getItem()) +"\n"+
-                                "\t"+"saber si el jugador está sobre suelo firme: "+player.isOnGround() +"\n"+
-                                "\t"+"saber si el jugador está sprinteando: "+player.isSprinting() +"\n"+
-                                "\t"+"saber si el jugador está en el agua (SOLO SI ESTA TOCANDO EL AGUA O BAJO ELLA): "+player.isInWater() +"\n"
+        System.out.println("[Player] La información sobre el jugador es: (player.?) " + "\n"+
+                                "\t"+"Nombre jugador: " + player.getName() + "\n"+
+                                "\t"+"Objeto que jugador lleva en mano DERECHA(MAIN_HAND): "+player.getMainHandItem() +"\n"+
+                                "\t"+"Ver que objetos hay en ambas manos del jugador [MAIN_HAND, OFF_HAND]: "+player.getHandSlots() +"\n"+
+                                "\t"+"Obtener coordenada X de la posicion del bloque where im standing: "+player.getBlockX() +"\n"+
+                                "\t"+"Obtener coordenada Y de la posicion del bloque where im standing: "+player.getBlockY() +"\n"+
+                                "\t"+"Obtener coordenada Z de la posicion del bloque where im standing: "+player.getBlockZ() +"\n"+
+                                "\t"+"Saber en que posicion está el bloque where player is standing: "+player.getOnPos() +"\n"+
+                                "\t"+"Saber posicion XYZ del jugador en el momento de la acción: "+player.position() +"\n"+
+                                "\t"+"Obtener objeto en la mano izquierda del jugador: "+player.getUseItem() +"\n"+
+                                "\t"+"Saber si jugador sigue sosteniendo el objeto usado: "+player.isHolding(event.getItemStack().getItem()) +"\n"+
+                                "\t"+"saber si el jugador está sobre suelo firme: "+player.isOnGround() +"\n"
 //                               "\t"+"" +"\n"+
                             );
-        System.out.println("[ItemStack] El item que sostiene el jugador es: (heldItem) " + "\n"+
+        
+        System.out.println("[ItemStack] El item que sostiene el jugador en MAIN_HAND es: (heldItem.?) " + "\n"+
                                 "\t"+"Nombre del item: "+ heldItem.getItem()+"\n"+
-                                "\t"+"Cantidad de ese item: "+ heldItem.getCount() +"\n"+
-                                "\t"+"heldItem.getDescriptionId() == "+ heldItem.getDescriptionId() +"\n"+
-                                "\t"+"heldItem.isEmpty() == "+ heldItem.isEmpty() +"\n"+
-                                "\t"+"Saber si el objeto que tiene en la mano está encantado: "+ heldItem.isEnchanted()+"\n"
+                                "\t"+"Cantidad del item: "+ heldItem.getCount() +"\n"+
+                                "\t"+"descripcion del item: "+ heldItem.getDescriptionId() +"\n"
+//                                "\t"+"" +"\n"+
+                            );
+    
+        System.out.println("[Level] Información general sobre el mundo: (world.?) " + "\n"+
+                                "\t"+"Obtener el nombre del mundo: "+world.toString() +"\n"+
+                                "\t"+"Saber en qué dimensión está el jugador (ej. Nether): "+world.dimension() +"\n"+
+                                "\t"+"Saber en qué Y coord está el nivel del mar: "+world.getSeaLevel() +"\n"
 //                                "\t"+"" +"\n"+
                             );
     
