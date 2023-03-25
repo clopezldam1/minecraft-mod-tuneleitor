@@ -120,16 +120,6 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         Level world = event.getLevel();
         ItemStack objetoUsado = event.getItemStack(); //@NotNull ¿?
         BlockPos targetedBlockPos = new BlockPos(pos.getX(),pos.getY(),pos.getZ());
-        Block targetedBlock = state.getBlock();
-        BlockState blockStandingOn = player.getBlockStateOn();
-        Block grassBlock = Blocks.GRASS_BLOCK;
-        Block glassBlock = Blocks.GLASS;
-        Block airBlock = Blocks.AIR;
-        TagKey<Item> pickAxes = Tags.Items.TOOLS_PICKAXES; //objetos pico de cualquier tipo
-        //GameTestHelper helper = new GameTestHelper(null); ESTO ES INUTIL LOL
-        ChunkAccess chunkTargeted1 = event.getLevel().getChunk(targetedBlockPos);
-        //LevelChunk chunkTargeted2 = event.getLevel().getChunk(targetedBlockPos.getX(), targetedBlockPos.getZ());
-        //BlockEntity chunkTargeted3 = event.getLevel().getBlockEntity(targetedBlockPos);
         
         //____________________________________________________________________________________________________
         //original 'if' code: (2 souts)
@@ -139,46 +129,12 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                 System.out.println("¡Has hecho click sobre un tronco!");
             }
         }
+   
+        generarEscaleras(event, targetedBlockPos, state, player);
         
-        //MY CODE:
-        System.out.println("\n---- PROBAR COSAS IDK (sacar mas variables) ----");
-            System.out.println("targetedBlock: "+targetedBlock);
-            System.out.println("blockStandingOn.getBlock(): "+blockStandingOn.getBlock()); //ESTO SALE COMO AIRE SIEMPRE, ES EL BLOQUE DE ENCIMA DE EL QUE ESTOY PISANDO
-            System.out.println("\ttargetedBlock.asItem().getDefaultInstance() == " + targetedBlock.asItem().getDefaultInstance());
-            System.out.println("\ttargetedBlock.asItem().getDefaultInstance().getItem == " + targetedBlock.asItem().getDefaultInstance().getItem());
-            System.out.println("\tblockStandingOn.getBlock().asItem().getDefaultInstance().getItem() == " + blockStandingOn.getBlock().asItem().getDefaultInstance().getItem());
-            System.out.println("\tblockStandingOn.getBlock().asItem().getDefaultInstance() == " + blockStandingOn.getBlock().asItem().getDefaultInstance()+"\n");
-           
-            if( ItemStack.isSame(targetedBlock.asItem().getDefaultInstance(), blockStandingOn.getBlock().asItem().getDefaultInstance()) ){
-                System.out.println("\tEl bloque sobre el que está standing ES IGUAL  que el bloque al que apunta");
-            }else{
-                System.out.println("\tSON BLOQUES DISTINTOS al que se le apunta y sobre el que está");
-            }
+        //ChunkAccess chunkTargeted = event.getLevel().getChunk(targetedBlockPos);
+        //chunkTargeted.setBlockState(targetedBlockPos, Blocks.GRASS_BLOCK.defaultBlockState(), true);
         
-        System.out.println("\n---- TRANSFORMAR TARGETED BLOCK ----");
-            if(targetedBlock.equals(grassBlock)){ //COMPROBACIÓN ANTES DE REEMPLAZAR EL BLOQUE AL QUE APUNTO
-                System.out.println("\thas actuado sobre un bloque de hierva [ANTES]");
-            }else{
-                System.out.println("\tNO ESTAS ACTUANDO SOBRE BLOQUE DE HIERVA [ANTES]"); //DA MAL (sale que targeted block es aire)
-            }
-            
-            //cambiar el targetedblock a uno de cristal
-                //event.getLevel().onBlockStateChange(targetedBlockPos,targetedBlock.defaultBlockState(),glassBlock.defaultBlockState());
-                chunkTargeted1.setBlockState(targetedBlockPos, glassBlock.defaultBlockState(), true); //ESTO FUNCIONA pero con retardo
-                chunkTargeted1.setBlockState(targetedBlockPos, glassBlock.defaultBlockState(), true); //ESTO FUNCIONA pero con retardo
-    
-        //chunkTargeted2.setBlockState(targetedBlockPos, glassBlock.defaultBlockState(), true); //esto no funciona
-                //chunkTargeted3.setBlockState(targetedBlock.defaultBlockState()); ESTO PETA
-        
-            if(targetedBlock.equals(glassBlock)){ //COMPROBACIÓN ANTES DE REEMPLAZAR EL BLOQUE AL QUE APUNTO
-                System.out.println("\tse ha transformado en un bloque de cristal [DESPUES]"); //DA BIEN
-            }else if(targetedBlock.equals(grassBlock)){
-                System.out.println("\tel bloque no ha sido afectado, sigue siendo hierva [DESPUES]");
-            }else{
-                System.out.println("\ttodo ha salido mal y no sé en qué se ha convertido ese bloque [DESPUES]");
-            }
-        
-    
         //my souts: -----------------------------------------------------------------------------------------------
         StringBuilder sb = new StringBuilder();
         sb.append("____________________________________________________________________________________________________________");
@@ -234,7 +190,34 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         
    
     }
-
+    @SubscribeEvent
+    public void generarEscaleras(PlayerInteractEvent.RightClickBlock event, BlockPos targetedBlockPos, BlockState state, Player player){
+        Block targetedBlock = state.getBlock();
+        BlockState blockStandingOn = player.getBlockStateOn();
+        Block grassBlock = Blocks.GRASS_BLOCK;
+        Block glassBlock = Blocks.GLASS;
+        Block airBlock = Blocks.AIR;
+        TagKey<Item> pickAxes = Tags.Items.TOOLS_PICKAXES; //objetos pico de cualquier tipo
+        ChunkAccess chunkTargeted = event.getLevel().getChunk(targetedBlockPos);
+        
+        int coordXBlockStairs = targetedBlockPos.getX(); //coordenada X de peldaño escaleras
+        int coordYBlockStairs = targetedBlockPos.getY(); //coordenada Y de peldaño escaleras
+        int coordZBlockStairsBottom = targetedBlockPos.getZ(); //coordenada Z de peldaño escaleras
+        int coordZBlockStairsTop = targetedBlockPos.getZ() + 4; //coordenada Z de techo escaleras
+        BlockPos newPosStairBottom = new BlockPos(coordXBlockStairs, coordYBlockStairs, coordZBlockStairsBottom);
+        BlockPos newPosStairTop = new BlockPos(coordXBlockStairs, coordYBlockStairs, coordZBlockStairsTop);
+        
+        for (int i = coordYBlockStairs; i >= 5; i--) {
+            chunkTargeted.setBlockState(newPosStairBottom, glassBlock.defaultBlockState(), true);
+            chunkTargeted.setBlockState(newPosStairTop, glassBlock.defaultBlockState(), true);
+            coordYBlockStairs = i;
+            coordZBlockStairsBottom -= 1;
+            coordZBlockStairsTop -= 1;
+        }
+       
+       
+        
+    }
     @Override
     @SubscribeEvent
     public void onPlayerWalk(MovementInputUpdateEvent event) {
