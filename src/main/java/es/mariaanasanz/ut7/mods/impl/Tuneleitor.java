@@ -237,16 +237,14 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
     
         if(event.getItemStack().getItem().toString().trim().endsWith("pickaxe")){
             for (int i = coordYBlockStairs; i >= 5; i--) {
-                BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairs, coordZBlockStairsBottom);
-                BlockPos newPosStairTop = new BlockPos(coordXBlockStairsBottom, coordYBlockStairs, coordZBlockStairsTop);
-        
-                chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
-                chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
-        
-                coordYBlockStairs--; //las escaleras siempre bajan 1 en altura, tanto en el suelo como en el techo
-                coordYBlockWall--; //las paredes tambien van bajando 1 en altura siempre, a la par que las escaleras
-        
+                
                 if (facing.toString().equals("north")) {
+                    BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairs, coordZBlockStairsBottom);
+                    BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYBlockStairs, coordZBlockStairsTop);
+                    
+                    chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
+                    chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
+                    
                     coordZBlockStairsBottom++;
                     coordZBlockStairsTop++;
             
@@ -257,7 +255,7 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                     for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
                         BlockPos newPosWallRight = new BlockPos(coordXBlockWallRightNorth, coordYBlockWall, coordZBlockWall);
                         BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeftNorth, coordYBlockWall, coordZBlockWall);
-                
+                        
                         chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
                         chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
                 
@@ -267,9 +265,15 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
             
             
                 } else if (facing.toString().equals("east")) {
-                    coordZBlockStairsBottom++;
-                    coordZBlockStairsTop++;
-    //              coordXBlockStairs; SE MANTIENE IGUAL
+                    BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairs, coordZBlockStairsBottom);
+                    BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYBlockStairs, coordZBlockStairsTop);
+                    
+                    chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
+                    chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
+                    
+                    coordXBlockStairsBottom--;
+                    coordXBlockStairsTop--;
+    //              coordZBlockStairs; SE MANTIENE IGUAL
     
     //                coordZBlockWallLeftEast; NO CAMBIA MAS QUE 1 VEZ
     //                coordZBlockWallRightEast;
@@ -278,7 +282,7 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                     for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
                         BlockPos newPosWallRight = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallRightEast);
                         BlockPos newPosWallLeft = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallLeftEast);
-                
+                        
                         chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
                         chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
                 
@@ -287,6 +291,12 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                     coordYBlockWall -= 5;
             
                 } else if (facing.toString().equals("south")) {
+                    BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairs, coordZBlockStairsBottom);
+                    BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYBlockStairs, coordZBlockStairsTop);
+                    
+                    chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
+                    chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
+                    
                     coordZBlockStairsBottom--;
                     coordZBlockStairsTop--;
     //                coordXBlockStairs; //SE QUEDA IGUAL
@@ -294,12 +304,11 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                     coordZBlockWall--; //valido para pared izquierda y derecha
     //                coordXBlockWallLeftSouth; NO CAMBIA MAS QUE 1 VEZ
     //                coordXBlockWallRightSouth;
-            
-            
+                    
                     for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
                         BlockPos newPosWallRight = new BlockPos(coordXBlockWallRightSouth, coordYBlockWall, coordZBlockWall);
                         BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeftSouth, coordYBlockWall, coordZBlockWall);
-                
+                        
                         chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
                         chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
                 
@@ -308,7 +317,15 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                     coordYBlockWall -= 5;
             
                 } else if (facing.toString().equals("west")) {
+                    BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairs, coordZBlockStairsBottom);
+                    BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYBlockStairs, coordZBlockStairsTop);
+                    
+                    chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
+                    chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
+                    
                     coordXBlockStairsBottom++;
+                    coordXBlockStairsTop++;
+//                    coordZBlockWall; //SE QUEDA IGUAL
     
     //                coordZBlockWallLeftWest;
     //                coordZBlockWallRightWest;
@@ -317,18 +334,19 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                     for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
                         BlockPos newPosWallRight = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallRightWest);
                         BlockPos newPosWallLeft = new BlockPos(coordYBlockWall, coordYBlockWall, coordZBlockWallLeftWest);
-                
+                        
                         chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
                         chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
                 
                         coordYBlockWall++;
                     }
                     coordYBlockWall -= 5;
-            
-            
+                    
                 }
-    //            coordYBlockWall--;
+                coordYBlockStairs--; //las escaleras siempre bajan 1 en altura, tanto en el suelo como en el techo
+                coordYBlockWall--; //las paredes tambien van bajando 1 en altura siempre, a la par que las escaleras
             }
+            
         }
     }
       
