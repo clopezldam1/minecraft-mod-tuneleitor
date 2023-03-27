@@ -2,6 +2,7 @@ package es.mariaanasanz.ut7.mods.impl;
 
 import es.mariaanasanz.ut7.mods.base.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestInfo;
 import net.minecraft.tags.TagKey;
@@ -168,6 +169,7 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                         "\t"+"Obtener objeto en la mano izquierda del jugador: "+player.getUseItem() +"\n"+
                         "\t"+"Saber si jugador sigue sosteniendo el objeto usado: "+player.isHolding(event.getItemStack().getItem()) +"\n"+
                         "\t"+"saber si el jugador está sobre suelo firme: "+player.isOnGround() +"\n"+
+                        "\t"+"Saber a qué dirección está facing el jugador: "+player.getDirection() +"\n"+
                         "\t"+"Obtener el bloque sobre el que el jugador is standing: "+player.getFeetBlockState() +"\n"
 //                      "\t"+"" +"\n"+
                     );
@@ -198,13 +200,18 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         BlockState state = event.getLevel().getBlockState(pos);
         Block targetedBlock = state.getBlock();
         ChunkAccess chunkTargeted = event.getLevel().getChunk(targetedBlockPos);
-        BlockState blockStandingOn = event.getEntity().getBlockStateOn(); //aka, player.getBlockStateOn()
+        Player player = event.getEntity();
+        BlockState blockStandingOn = player.getBlockStateOn(); //aka, player.getBlockStateOn()
         
         Block grassBlock = Blocks.GRASS_BLOCK;
-        Block woodBlock = Blocks.GREEN_STAINED_GLASS;
-        Block glassBlock = Blocks.GLASS;
+        Block greenGlass = Blocks.GREEN_STAINED_GLASS;
+        Block orangeGlas = Blocks.ORANGE_STAINED_GLASS;
+        Block transparentGlass = Blocks.GLASS;
+        Block blackGlass = Blocks.BLACK_STAINED_GLASS;
         Block airBlock = Blocks.AIR;
         TagKey<Item> pickAxes = Tags.Items.TOOLS_PICKAXES; //objetos pico de cualquier tipo
+    
+        Direction facing = player.getDirection();
 
         int coordXBlockStairs = targetedBlockPos.getX(); //coordenada X de peldaño escaleras
         int coordYBlockStairs = targetedBlockPos.getY(); //coordenada Y de peldaño escaleras
@@ -212,38 +219,116 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         int coordZBlockStairsTop = targetedBlockPos.getZ() + 5; //coordenada Z de techo escaleras
 
         int coordYBlockWall = targetedBlockPos.getY(); //empezamos a construir la pared al ras del escalónn
-        int coordXBlockWallRight = targetedBlockPos.getX() - 1;
-        int coordXBlockWallLeft = targetedBlockPos.getX() + 1;
+        int coordXBlockWall = targetedBlockPos.getX();
         int coordZBlockWall = targetedBlockPos.getZ();
+        
+        int coordXBlockWallLeftNorth = targetedBlockPos.getX()-1;
+        int coordXBlockWallRightNorth = targetedBlockPos.getX()+1;
+    
+        int coordZBlockWallLeftEast = targetedBlockPos.getZ()-1;
+        int coordZBlockWallRightEast = targetedBlockPos.getZ()+1;
+    
+        int coordXBlockWallLeftSouth = targetedBlockPos.getX()+1;
+        int coordXBlockWallRightSouth = targetedBlockPos.getX()-1;
+    
+        int coordZBlockWallLeftWest = targetedBlockPos.getZ()+1;
+        int coordZBlockWallRightWest = targetedBlockPos.getZ()-1;
+    
+    
+        for (int i = coordYBlockStairs; i >= 5; i--) {
+            BlockPos newPosStairBottom = new BlockPos(coordXBlockStairs, coordYBlockStairs, coordZBlockStairsBottom);
+            BlockPos newPosStairTop = new BlockPos(coordXBlockStairs, coordYBlockStairs, coordZBlockStairsTop);
 
-//        if(event.getItemStack().equals(Items.DIAMOND_PICKAXE.getDefaultInstance())) {
-            for (int i = coordYBlockStairs; i >= 5; i--) {
-                System.out.println(coordYBlockStairs);
-                BlockPos newPosStairBottom = new BlockPos(coordXBlockStairs, coordYBlockStairs, coordZBlockStairsBottom);
-                BlockPos newPosStairTop = new BlockPos(coordXBlockStairs, coordYBlockStairs, coordZBlockStairsTop);
+            chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
+            chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
+            
+            coordYBlockStairs--; //las escaleras siempre bajan 1 en altura, tanto en el suelo como en el techo
+            coordYBlockWall--; //las paredes tambien van bajando 1 en altura siempre, a la par que las escaleras
 
-
-                chunkTargeted.setBlockState(newPosStairBottom, glassBlock.defaultBlockState(), true);
-                chunkTargeted.setBlockState(newPosStairTop, glassBlock.defaultBlockState(), true);
-
-                for (int j = 1; j <= 4; j++) {
-                    BlockPos newPosWallRight = new BlockPos(coordXBlockWallRight, coordYBlockWall + j, coordZBlockWall);
-                    BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeft, coordYBlockWall + j, coordZBlockWall);
-
-                    chunkTargeted.setBlockState(newPosWallRight, woodBlock.defaultBlockState(), true);
-                    chunkTargeted.setBlockState(newPosWallLeft, woodBlock.defaultBlockState(), true);
+            if(facing.equals("north")){
+                coordZBlockStairsBottom++;
+                coordZBlockStairsTop++;
+                
+                coordZBlockWall++; //valido para pared izquierda y derecha
+//                coordXBlockWallLeftNorth; NO CAMBIA MAS QUE 1 VEZ
+//                coordXBlockWallRightNorth;
+    
+                for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
+                    BlockPos newPosWallRight = new BlockPos(coordXBlockWallRightNorth, coordYBlockWall, coordZBlockWall);
+                    BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeftNorth, coordYBlockWall, coordZBlockWall);
+        
+                    chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
+                    chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
+        
+                    coordYBlockWall++;
                 }
+                coordYBlockWall-=5;
+    
+    
+            }else if(facing.toString().equals("east")){
+//              coordZBlockWall; SE MANTIENE IGUAL
 
-                coordYBlockStairs--;
+//                coordZBlockWallLeftEast; NO CAMBIA MAS QUE 1 VEZ
+//                coordZBlockWallRightEast;
+                coordXBlockWall--; //valido para pared izquierda y derecha
+                
+                for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
+                    BlockPos newPosWallRight = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallRightEast);
+                    BlockPos newPosWallLeft = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallLeftEast);
+        
+                    chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
+                    chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
+        
+                    coordYBlockWall++;
+                }
+                coordYBlockWall-=5;
+    
+            }else if(facing.toString().equals("south")){
                 coordZBlockStairsBottom--;
                 coordZBlockStairsTop--;
-
-                coordXBlockWallRight--;
-                coordYBlockWall--;
-                coordZBlockWall--;
-                coordXBlockWallLeft--;
+                
+//                coordXBlockWall; //SE QUEDA IGUAL
+    
+                coordZBlockWall--; //valido para pared izquierda y derecha
+//                coordXBlockWallLeftSouth; NO CAMBIA MAS QUE 1 VEZ
+//                coordXBlockWallRightSouth;
+    
+                
+                for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
+                    BlockPos newPosWallRight = new BlockPos(coordXBlockWallRightSouth, coordYBlockWall, coordZBlockWall);
+                    BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeftSouth, coordYBlockWall, coordZBlockWall);
+        
+                    chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
+                    chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
+        
+                    coordYBlockWall++;
+                }
+                coordYBlockWall-=5;
+                
+            }else if(facing.toString().equals("west")){
+                coordXBlockStairs++;
+    
+//                coordZBlockWallLeftWest;
+//                coordZBlockWallRightWest;
+                coordXBlockWall++;
+                
+                for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
+                    BlockPos newPosWallRight = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallRightWest);
+                    BlockPos newPosWallLeft = new BlockPos(coordYBlockWall, coordYBlockWall, coordZBlockWallLeftWest);
+        
+                    chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
+                    chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
+        
+                    coordYBlockWall++;
+                }
+                coordYBlockWall-=5;
+    
+    
             }
+//            coordYBlockWall--;
         }
+    }
+      
 
 //    }
     @Override
