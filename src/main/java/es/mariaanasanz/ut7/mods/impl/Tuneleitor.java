@@ -8,6 +8,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -117,7 +118,7 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         ItemStack heldItem = player.getMainHandItem();
         
         //my variables:
-        Level world = event.getLevel();
+        Level world = player.getCommandSenderWorld();
         ItemStack objetoUsado = event.getItemStack(); //@NotNull ¿?
         BlockPos targetedBlockPos = new BlockPos(pos.getX(),pos.getY(),pos.getZ());
         
@@ -130,7 +131,7 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
             }
         }
    
-        generarEscaleras(event, targetedBlockPos, state, player);
+        generarEscaleras(event);
         
         //ChunkAccess chunkTargeted = event.getLevel().getChunk(targetedBlockPos);
         //chunkTargeted.setBlockState(targetedBlockPos, Blocks.GRASS_BLOCK.defaultBlockState(), true);
@@ -191,33 +192,60 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
    
     }
     @SubscribeEvent
-    public void generarEscaleras(PlayerInteractEvent.RightClickBlock event, BlockPos targetedBlockPos, BlockState state, Player player){
+    public void generarEscaleras(PlayerInteractEvent.RightClickBlock event){
+        BlockPos pos = event.getPos();  //.getY(), .getX(), .getZ()
+        BlockPos targetedBlockPos = new BlockPos(pos.getX(),pos.getY(),pos.getZ());
+        BlockState state = event.getLevel().getBlockState(pos);
         Block targetedBlock = state.getBlock();
-        BlockState blockStandingOn = player.getBlockStateOn();
+        ChunkAccess chunkTargeted = event.getLevel().getChunk(targetedBlockPos);
+        BlockState blockStandingOn = event.getEntity().getBlockStateOn(); //aka, player.getBlockStateOn()
+        
         Block grassBlock = Blocks.GRASS_BLOCK;
+        Block woodBlock = Blocks.GREEN_STAINED_GLASS;
         Block glassBlock = Blocks.GLASS;
         Block airBlock = Blocks.AIR;
         TagKey<Item> pickAxes = Tags.Items.TOOLS_PICKAXES; //objetos pico de cualquier tipo
-        ChunkAccess chunkTargeted = event.getLevel().getChunk(targetedBlockPos);
-        
+
         int coordXBlockStairs = targetedBlockPos.getX(); //coordenada X de peldaño escaleras
         int coordYBlockStairs = targetedBlockPos.getY(); //coordenada Y de peldaño escaleras
         int coordZBlockStairsBottom = targetedBlockPos.getZ(); //coordenada Z de peldaño escaleras
-        int coordZBlockStairsTop = targetedBlockPos.getZ() + 4; //coordenada Z de techo escaleras
-        BlockPos newPosStairBottom = new BlockPos(coordXBlockStairs, coordYBlockStairs, coordZBlockStairsBottom);
-        BlockPos newPosStairTop = new BlockPos(coordXBlockStairs, coordYBlockStairs, coordZBlockStairsTop);
-        
-        for (int i = coordYBlockStairs; i >= 5; i--) {
-            chunkTargeted.setBlockState(newPosStairBottom, glassBlock.defaultBlockState(), true);
-            chunkTargeted.setBlockState(newPosStairTop, glassBlock.defaultBlockState(), true);
-            coordYBlockStairs = i;
-            coordZBlockStairsBottom -= 1;
-            coordZBlockStairsTop -= 1;
+        int coordZBlockStairsTop = targetedBlockPos.getZ() + 5; //coordenada Z de techo escaleras
+
+        int coordYBlockWall = targetedBlockPos.getY(); //empezamos a construir la pared al ras del escalónn
+        int coordXBlockWallRight = targetedBlockPos.getX() - 1;
+        int coordXBlockWallLeft = targetedBlockPos.getX() + 1;
+        int coordZBlockWall = targetedBlockPos.getZ();
+
+//        if(event.getItemStack().equals(Items.DIAMOND_PICKAXE.getDefaultInstance())) {
+            for (int i = coordYBlockStairs; i >= 5; i--) {
+                System.out.println(coordYBlockStairs);
+                BlockPos newPosStairBottom = new BlockPos(coordXBlockStairs, coordYBlockStairs, coordZBlockStairsBottom);
+                BlockPos newPosStairTop = new BlockPos(coordXBlockStairs, coordYBlockStairs, coordZBlockStairsTop);
+
+
+                chunkTargeted.setBlockState(newPosStairBottom, glassBlock.defaultBlockState(), true);
+                chunkTargeted.setBlockState(newPosStairTop, glassBlock.defaultBlockState(), true);
+
+                for (int j = 1; j <= 4; j++) {
+                    BlockPos newPosWallRight = new BlockPos(coordXBlockWallRight, coordYBlockWall + j, coordZBlockWall);
+                    BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeft, coordYBlockWall + j, coordZBlockWall);
+
+                    chunkTargeted.setBlockState(newPosWallRight, woodBlock.defaultBlockState(), true);
+                    chunkTargeted.setBlockState(newPosWallLeft, woodBlock.defaultBlockState(), true);
+                }
+
+                coordYBlockStairs--;
+                coordZBlockStairsBottom--;
+                coordZBlockStairsTop--;
+
+                coordXBlockWallRight--;
+                coordYBlockWall--;
+                coordZBlockWall--;
+                coordXBlockWallLeft--;
+            }
         }
-       
-       
-        
-    }
+
+//    }
     @Override
     @SubscribeEvent
     public void onPlayerWalk(MovementInputUpdateEvent event) {
