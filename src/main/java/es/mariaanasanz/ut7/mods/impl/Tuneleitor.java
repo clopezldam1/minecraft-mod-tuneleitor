@@ -3,21 +3,15 @@ package es.mariaanasanz.ut7.mods.impl;
 import es.mariaanasanz.ut7.mods.base.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.gametest.framework.GameTestInfo;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.client.event.MovementInputUpdateEvent;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -30,7 +24,6 @@ import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * TUNELEITOR:
@@ -132,7 +125,7 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
             }
         }
    
-        generarEscaleras(event);
+        generarTunel(event);
         
         //ChunkAccess chunkTargeted = event.getLevel().getChunk(targetedBlockPos);
         //chunkTargeted.setBlockState(targetedBlockPos, Blocks.GRASS_BLOCK.defaultBlockState(), true);
@@ -194,15 +187,17 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
    
     }
     @SubscribeEvent
-    public void generarEscaleras(PlayerInteractEvent.RightClickBlock event){
+    public void generarTunel(PlayerInteractEvent.RightClickBlock event){
+        //Posición del bloque (y otros):
         BlockPos pos = event.getPos();  //.getY(), .getX(), .getZ()
         BlockPos targetedBlockPos = new BlockPos(pos.getX(),pos.getY(),pos.getZ());
         BlockState state = event.getLevel().getBlockState(pos);
         Block targetedBlock = state.getBlock();
         ChunkAccess chunkTargeted = event.getLevel().getChunk(targetedBlockPos);
         Player player = event.getEntity();
-        BlockState blockStandingOn = player.getBlockStateOn(); //aka, player.getBlockStateOn()
+        BlockState blockStandingOn = player.getBlockStateOn();
         
+        //Bloques y herramientas:
         Block grassBlock = Blocks.GRASS_BLOCK;
         Block greenGlass = Blocks.GREEN_STAINED_GLASS;
         Block orangeGlas = Blocks.ORANGE_STAINED_GLASS;
@@ -211,14 +206,18 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         Block airBlock = Blocks.AIR;
         TagKey<Item> pickAxes = Tags.Items.TOOLS_PICKAXES; //objetos pico de cualquier tipo
     
+        //Orientación del jugador:
         Direction facing = player.getDirection();
     
+        //ESCALERAS: (top/bottom)
         int coordYBlockStairs = targetedBlockPos.getY(); //coordenada Y de peldaño escaleras
         int coordZBlockStairsBottom = targetedBlockPos.getZ(); //coordenada Z de peldaño escaleras
-        int coordZBlockStairsTop = targetedBlockPos.getZ() + 5; //coordenada Z de techo escaleras
         int coordXBlockStairsBottom = targetedBlockPos.getX(); //coordenada X de peldaño escaleras
+    
+        int coordZBlockStairsTop = targetedBlockPos.getZ() + 5; //coordenada Z de techo escaleras
         int coordXBlockStairsTop = targetedBlockPos.getX(); //coordenada X de techo escaleras
         
+        //PARED: (left/right)
         int coordYBlockWall = targetedBlockPos.getY(); //empezamos a construir la pared al ras del escalónn
         int coordXBlockWall = targetedBlockPos.getX();
         int coordZBlockWall = targetedBlockPos.getZ();
@@ -235,8 +234,8 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         int coordZBlockWallLeftWest = targetedBlockPos.getZ()+1;
         int coordZBlockWallRightWest = targetedBlockPos.getZ()-1;
     
-        if(event.getItemStack().getItem().toString().trim().endsWith("pickaxe")){
-            for (int i = coordYBlockStairs; i >= 5; i--) {
+        if(event.getItemStack().getItem().toString().trim().endsWith("pickaxe")){ //si la herramienta empleada es un pico
+            for (int i = coordYBlockStairs; i >= 5; i--) { //parar de generar el tunel en la coordenada Y = 5 (jugador debe usar pico en un bloque que esté por encima para que se genere el tunel)
                 
                 if (facing.toString().equals("north")) {
                     BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairs, coordZBlockStairsBottom);
