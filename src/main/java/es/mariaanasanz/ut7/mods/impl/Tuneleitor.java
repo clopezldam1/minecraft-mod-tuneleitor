@@ -331,7 +331,7 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
     
                     for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
                         BlockPos newPosWallRight = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallRightWest);
-                        BlockPos newPosWallLeft = new BlockPos(coordYBlockWall, coordYBlockWall, coordZBlockWallLeftWest);
+                        BlockPos newPosWallLeft = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallLeftWest);
         
                         chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
                         chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
