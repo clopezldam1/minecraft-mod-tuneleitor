@@ -112,8 +112,8 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         //my variables:
         Level world = player.getCommandSenderWorld();
 //        ItemStack objetoUsado = event.getItemStack(); //@NotNull ¿?
-//        BlockPos targetedBlockPos = new BlockPos(pos.getX(),pos.getY(),pos.getZ());
-    
+        
+        BlockPos targetedBlockPos = new BlockPos(pos.getX(),pos.getY(),pos.getZ());
         Block grassBlock = Blocks.GRASS_BLOCK;
         Block targetedBlock = state.getBlock();
     
@@ -128,7 +128,7 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
 //        }
     
         if(event.getItemStack().getItem().toString().trim().endsWith("pickaxe")) { //si la herramienta empleada es un pico
-            if (targetedBlock.equals(grassBlock)) { //si se ha usado un pico sobre un bloque de hierva
+            if (targetedBlock.equals(grassBlock) && targetedBlockPos.getY() > 5) { //si se ha usado un pico sobre un bloque de hierva y bloque está por encima de coord.Y = 5
                 generarTunel(event);
             }
         }
@@ -241,127 +241,106 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         BlockPos minecartPos = targetedBlockPos.above();
         
         
-       
-        
-
-//        if(event.getItemStack().getItem().toString().trim().endsWith("pickaxe")) { //si la herramienta empleada es un pico
-//            if (targetedBlock.equals(grassBlock)) { //si se ha usado un pico sobre un bloque de hierva
-                while (coordYStairsBottom >= 5) { //parar de generar el tunel en la coordenada Y = 5 (jugador debe usar pico en un bloque que esté por encima para que se genere el tunel)
-//                  --------------------------------------------------------------------------------------------------------------------------------------------
-                    if (facing.toString().equals("south")) { //genera tunel hacia el sur (aka, where ur facing)
-                        
-                        addBlock(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
-                        addBlock(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
-                        
-                        addBlock(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
-                        for (int i = 2; i <=4 ; i++) {
-                            addBlock(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
-                        }
-            
-                        coordZStairsBottom++;
-                        coordZBlockStairsTop++;
-                      //  coordYBlockStairsTop; SE QUEDA SIEMPRE IGUAL
-            
-                        for (int j = 1; j <= 5; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                            addBlock(world, greenGlass.defaultBlockState(), coordXWall-1, coordYWall, coordZWall); //RIGHT WALL
-                            addBlock(world, orangeGlass.defaultBlockState(), coordXWall+1, coordYWall, coordZWall); //LEFT WALL
+        while (coordYStairsBottom >= 5) { //parar de generar el tunel en la coordenada Y = 5 (jugador debe usar pico en un bloque que esté por encima de Y=5 para que se genere el tunel)
+            if (facing.toString().equals("south")) { //genera tunel hacia el sur (aka, where ur facing)
                 
-                            coordYWall++;
-                        }
-                        coordYWall -= 5;
-            
-                        coordZWall++; //valido para pared izquierda y derecha
-                        //  coordXBlockWallLeftNorth; NO CAMBIA MAS QUE 1 VEZ
-                        //  coordXBlockWallRightNorth;
-//                  --------------------------------------------------------------------------------------------------------------------------------------------
-                    } else if (facing.toString().equals("west")) {
-                        addBlock(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
-                        addBlock(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
-    
-                        addBlock(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
-                        for (int i = 2; i <=4 ; i++) {
-                            addBlock(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
-                        }
-            
-                        coordXStairsBottom--;
-                        coordXBlockStairsTop--;
-                        // coordZBlockStairs; SE MANTIENE IGUAL
-            
-                        for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                            addBlock(world, greenGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall-1); //RIGHT WALL
-                            addBlock(world, orangeGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall+1); //LEFT WALL
+                addBlock(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
+                addBlock(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
                 
-                            coordYWall++;
-                        }
-                        coordYWall -= 5;
-            
-                        //  coordZBlockWallLeftEast; NO CAMBIA MAS QUE 1 VEZ
-                        //  coordZBlockWallRightEast;
-                        coordXWall--; //valido para pared izquierda y derecha
-//                  --------------------------------------------------------------------------------------------------------------------------------------------
-                    } else if (facing.toString().equals("north")) {
-                        addBlock(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
-                        addBlock(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
-    
-                        addBlock(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
-                        for (int i = 2; i <=4 ; i++) {
-                            addBlock(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
-                        }
-
-                        coordZStairsBottom--;
-                        coordZBlockStairsTop--;
-                        //  coordXBlockStairs; //SE QUEDA IGUAL
-            
-                        for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                            addBlock(world, greenGlass.defaultBlockState(), coordXWall+1, coordYWall, coordZWall); //RIGHT WALL
-                            addBlock(world, orangeGlass.defaultBlockState(), coordXWall-1, coordYWall, coordZWall); //LEFT WALL
-                
-                            coordYWall++;
-                        }
-                        coordYWall -= 5;
-            
-                        coordZWall--; //valido para pared izquierda y derecha
-                        //   coordXBlockWallLeftSouth; NO CAMBIA MAS QUE 1 VEZ
-                        //    coordXBlockWallRightSouth;
-//                  --------------------------------------------------------------------------------------------------------------------------------------------
-            
-                    } else if (facing.toString().equals("east")) {
-                        addBlock(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
-                        addBlock(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
-                        
-                        addBlock(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
-                        for (int i = 2; i <=4 ; i++) {
-                            addBlock(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
-                        }
-            
-                        coordXStairsBottom++;
-                        coordXBlockStairsTop++;
-//                      coordZWall; //SE QUEDA IGUAL
-            
-                        for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                             addBlock(world, greenGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall+1); //RIGHT WALL
-                             addBlock(world, orangeGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall-1); //LEFT WALL
-                
-                            coordYWall++;
-                        }
-                        coordYWall -= 5;
-            
-                        //   coordZBlockWallLeftWest;
-                        //   coordZBlockWallRightWest;
-                        coordXWall++;
-                    }
-                    coordYStairsBottom--; //las escaleras siempre bajan 1 en altura, tanto en el suelo como en el techo
-                    coordYWall--; //las paredes tambien van bajando 1 en altura siempre, a la par que las escaleras
+                addBlock(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
+                for (int i = 2; i <=4 ; i++) {
+                    addBlock(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
                 }
-//              --------------------------------------------------------------------------------------------------------------------------------------------
-//            }
-//        }
+    
+                coordZStairsBottom++;
+                coordZBlockStairsTop++;
+                
+                for (int j = 1; j <= 5; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
+                    addBlock(world, greenGlass.defaultBlockState(), coordXWall-1, coordYWall, coordZWall); //RIGHT WALL
+                    addBlock(world, orangeGlass.defaultBlockState(), coordXWall+1, coordYWall, coordZWall); //LEFT WALL
         
-        generarEntradaTunel(facing, world, blockStandingOnPos);
+                    coordYWall++;
+                }
+                coordYWall -= 5;
+    
+                coordZWall++;
+                
+            } else if (facing.toString().equals("west")) {
+                addBlock(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
+                addBlock(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
 
-        BlockPos lastTunnelBlockPos = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
-        generarFinTrayecto(facing, world, lastTunnelBlockPos);
+                addBlock(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
+                for (int i = 2; i <=4 ; i++) {
+                    addBlock(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
+                }
+    
+                coordXStairsBottom--;
+                coordXBlockStairsTop--;
+    
+                for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
+                    addBlock(world, greenGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall-1); //RIGHT WALL
+                    addBlock(world, orangeGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall+1); //LEFT WALL
         
+                    coordYWall++;
+                }
+                coordYWall -= 5;
+                
+                coordXWall--;
+                
+            } else if (facing.toString().equals("north")) {
+                addBlock(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
+                addBlock(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
+
+                addBlock(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
+                for (int i = 2; i <=4 ; i++) {
+                    addBlock(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
+                }
+                
+                coordZStairsBottom--;
+                coordZBlockStairsTop--;
+
+                for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
+                    addBlock(world, greenGlass.defaultBlockState(), coordXWall+1, coordYWall, coordZWall); //RIGHT WALL
+                    addBlock(world, orangeGlass.defaultBlockState(), coordXWall-1, coordYWall, coordZWall); //LEFT WALL
+        
+                    coordYWall++;
+                }
+                coordYWall -= 5;
+    
+                coordZWall--;
+    
+            } else if (facing.toString().equals("east")) {
+                addBlock(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
+                addBlock(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
+                
+                addBlock(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
+                for (int i = 2; i <=4 ; i++) {
+                    addBlock(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
+                }
+    
+                coordXStairsBottom++;
+                coordXBlockStairsTop++;
+    
+                for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
+                     addBlock(world, greenGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall+1); //RIGHT WALL
+                     addBlock(world, orangeGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall-1); //LEFT WALL
+        
+                    coordYWall++;
+                }
+                coordYWall -= 5;
+                
+                coordXWall++;
+            }
+            
+            coordYStairsBottom--; //las escaleras siempre bajan 1 en altura, tanto en el suelo como en el techo
+            coordYWall--; //las paredes tambien van bajando 1 en altura siempre, a la par que las escaleras
+        }
+        
+//        generarEntradaTunel(facing, world, blockStandingOnPos);
+//
+//        BlockPos lastTunnelBlockPos = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
+//        generarFinTrayecto(facing, world, lastTunnelBlockPos);
+    
     }
     
     /**
