@@ -1,6 +1,7 @@
 package es.mariaanasanz.ut7.mods.impl;
 
 import es.mariaanasanz.ut7.mods.base.*;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.TagKey;
@@ -186,7 +187,7 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         
    
     }
-    @SubscribeEvent
+   
     public void generarTunel(PlayerInteractEvent.RightClickBlock event){
         //Posición del bloque (y otros):
         BlockPos pos = event.getPos();  //.getY(), .getX(), .getZ()
@@ -236,8 +237,8 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         int coordZBlockWallRightWest = targetedBlockPos.getZ()-1;
     
         if(event.getItemStack().getItem().toString().trim().endsWith("pickaxe")){ //si la herramienta empleada es un pico
-//            for (int i = coordYBlockStairsBottom; i >= 5; i--) { //parar de generar el tunel en la coordenada Y = 5 (jugador debe usar pico en un bloque que esté por encima para que se genere el tunel)
-            while(coordYBlockStairsBottom != 5){
+//            for (int i = coordYBlockStairsBottom; i >= 5; i--) {
+            while(coordYBlockStairsBottom != 5){ //parar de generar el tunel en la coordenada Y = 5 (jugador debe usar pico en un bloque que esté por encima para que se genere el tunel)
 //              --------------------------------------------------------------------------------------------------------------------------------------------
                 if (facing.toString().equals("south")) { //genera tunel hacia el sur (aka, where ur facing)
                     BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom, coordZBlockStairsBottom);
@@ -309,6 +310,9 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                         chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
                         chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
         
+//                        event.getLevel().
+//                        Minecraft.getInstance().level.setBlock(, , );
+                        
                         coordYBlockWall++;
                     }
                     coordYBlockWall -= 5;
