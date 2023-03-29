@@ -26,6 +26,8 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.awt.*;
+
 /**
  * TUNELEITOR:
  *
@@ -207,8 +209,8 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         //Bloques y herramientas:
         Block grassBlock = Blocks.GRASS_BLOCK;
         Block greenGlass = Blocks.GREEN_STAINED_GLASS;
-        Block orangeGlas = Blocks.ORANGE_STAINED_GLASS;
-        Block transparentGlass = Blocks.GLASS;
+        Block orangeGlass = Blocks.ORANGE_STAINED_GLASS;
+        Block clearGlass = Blocks.GLASS;
         Block blackGlass = Blocks.BLACK_STAINED_GLASS;
         Block airBlock = Blocks.AIR;
         Block railBlock = Blocks.RAIL; //POWERED_RAIL -> for more speed (if needed)
@@ -219,18 +221,18 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         Direction facing = player.getDirection();
     
         //ESCALERAS: (top/bottom)
-        int coordYBlockStairsBottom = targetedBlockPos.getY(); //coordenada Y de peldaño escaleras
-        int coordZBlockStairsBottom = targetedBlockPos.getZ(); //coordenada Z de peldaño escaleras
-        int coordXBlockStairsBottom = targetedBlockPos.getX(); //coordenada X de peldaño escaleras
+        int coordYStairsBottom = targetedBlockPos.getY(); //coordenada Y de peldaño escaleras
+        int coordZStairsBottom = targetedBlockPos.getZ(); //coordenada Z de peldaño escaleras
+        int coordXStairsBottom = targetedBlockPos.getX(); //coordenada X de peldaño escaleras
     
 //        int coordYBlockStairsTop = targetedBlockPos.getY() + 5;
         int coordZBlockStairsTop = targetedBlockPos.getZ(); //coordenada Z de techo escaleras
         int coordXBlockStairsTop = targetedBlockPos.getX(); //coordenada X de techo escaleras
         
         //PARED: (left/right)
-        int coordYBlockWall = targetedBlockPos.getY(); //empezamos a construir la pared al ras del escalónn
-        int coordXBlockWall = targetedBlockPos.getX();
-        int coordZBlockWall = targetedBlockPos.getZ();
+        int coordYWall = targetedBlockPos.getY(); //empezamos a construir la pared al ras del escalónn
+        int coordXWall = targetedBlockPos.getX();
+        int coordZWall = targetedBlockPos.getZ();
         
         int coordXBlockWallLeftNorth = targetedBlockPos.getX()-1;
         int coordXBlockWallRightNorth = targetedBlockPos.getX()+1;
@@ -246,138 +248,158 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
     
         if(event.getItemStack().getItem().toString().trim().endsWith("pickaxe")) { //si la herramienta empleada es un pico
             if (targetedBlock.equals(grassBlock)) { //si se ha usado un pico sobre un bloque de hierva
-//            for (int i = coordYBlockStairsBottom; i >= 5; i--) {
-                while (coordYBlockStairsBottom != 5) { //parar de generar el tunel en la coordenada Y = 5 (jugador debe usar pico en un bloque que esté por encima para que se genere el tunel)
+//            for (int i = coordYStairsBottom; i >= 5; i--) {
+                while (coordYStairsBottom != 5) { //parar de generar el tunel en la coordenada Y = 5 (jugador debe usar pico en un bloque que esté por encima para que se genere el tunel)
 //                  --------------------------------------------------------------------------------------------------------------------------------------------
                     if (facing.toString().equals("south")) { //genera tunel hacia el sur (aka, where ur facing)
-                        BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom, coordZBlockStairsBottom);
-                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom + 5, coordZBlockStairsTop);
+                        addTunnelSection(chunkTargeted, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
+                        addTunnelSection(chunkTargeted, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
+//                        BlockPos newPosStairBottom = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
+//                        BlockPos newPosStairTop = new BlockPos(coordXStairsBottom, coordYStairsBottom + 5, coordZBlockStairsTop);
+//
+//                        chunkTargeted.setBlockState(newPosStairBottom, clearGlass.defaultBlockState(), true); //techo
+//                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
             
-                        chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
-                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
-            
-                        coordZBlockStairsBottom++;
+                        coordZStairsBottom++;
                         coordZBlockStairsTop++;
-//                    coordYBlockStairsTop; SE QUEDA SIEMPRE IGUAL
+                     //   coordYBlockStairsTop; SE QUEDA SIEMPRE IGUAL
             
                         for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                            BlockPos newPosWallRight = new BlockPos(coordXBlockWallRightNorth, coordYBlockWall, coordZBlockWall);
-                            BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeftNorth, coordYBlockWall, coordZBlockWall);
+                            addTunnelSection(chunkTargeted, greenGlass.defaultBlockState(), coordXBlockWallRightNorth, coordYWall, coordZWall); //RIGHT WALL
+                            addTunnelSection(chunkTargeted, orangeGlass.defaultBlockState(), coordXBlockWallLeftNorth, coordYWall, coordZWall); //LEFT WALL
+//                            BlockPos newPosWallRight = new BlockPos(coordXBlockWallRightNorth, coordYWall, coordZWall);
+//                            BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeftNorth, coordYWall, coordZWall);
+//
+//                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
+//                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlass.defaultBlockState(), true);
                 
-                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
-                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
-                
-                            coordYBlockWall++;
+                            coordYWall++;
                         }
-                        coordYBlockWall -= 5;
+                        coordYWall -= 5;
             
-                        coordZBlockWall++; //valido para pared izquierda y derecha
-                        //                coordXBlockWallLeftNorth; NO CAMBIA MAS QUE 1 VEZ
-                        //                coordXBlockWallRightNorth;
+                        coordZWall++; //valido para pared izquierda y derecha
+                        //  coordXBlockWallLeftNorth; NO CAMBIA MAS QUE 1 VEZ
+                        //  coordXBlockWallRightNorth;
 //                  --------------------------------------------------------------------------------------------------------------------------------------------
                     } else if (facing.toString().equals("west")) {
-                        BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom, coordZBlockStairsBottom);
-                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYBlockStairsBottom + 5, coordZBlockStairsTop);
+                        addTunnelSection(chunkTargeted, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
+                        addTunnelSection(chunkTargeted, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
+//                        BlockPos newPosStairBottom = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
+//                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYStairsBottom + 5, coordZBlockStairsTop);
+//
+//                        chunkTargeted.setBlockState(newPosStairBottom, clearGlass.defaultBlockState(), true); //techo
+//                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
             
-                        chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
-                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
-            
-                        coordXBlockStairsBottom--;
+                        coordXStairsBottom--;
                         coordXBlockStairsTop--;
-                        //              coordZBlockStairs; SE MANTIENE IGUAL
+                        // coordZBlockStairs; SE MANTIENE IGUAL
             
                         for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                            BlockPos newPosWallRight = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallRightEast);
-                            BlockPos newPosWallLeft = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallLeftEast);
+                            addTunnelSection(chunkTargeted, greenGlass.defaultBlockState(), coordXWall, coordYWall, coordZBlockWallRightEast); //RIGHT WALL
+                            addTunnelSection(chunkTargeted, orangeGlass.defaultBlockState(), coordXWall, coordYWall, coordZBlockWallLeftEast); //LEFT WALL
+
+//                            BlockPos newPosWallRight = new BlockPos(coordXWall, coordYWall, coordZBlockWallRightEast);
+//                            BlockPos newPosWallLeft = new BlockPos(coordXWall, coordYWall, coordZBlockWallLeftEast);
+//
+//                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
+//                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlass.defaultBlockState(), true);
                 
-                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
-                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
-                
-                            coordYBlockWall++;
+                            coordYWall++;
                         }
-                        coordYBlockWall -= 5;
+                        coordYWall -= 5;
             
-                        //                coordZBlockWallLeftEast; NO CAMBIA MAS QUE 1 VEZ
-                        //                coordZBlockWallRightEast;
-                        coordXBlockWall--; //valido para pared izquierda y derecha
+                        //  coordZBlockWallLeftEast; NO CAMBIA MAS QUE 1 VEZ
+                        //  coordZBlockWallRightEast;
+                        coordXWall--; //valido para pared izquierda y derecha
 //                  --------------------------------------------------------------------------------------------------------------------------------------------
                     } else if (facing.toString().equals("north")) {
-                        BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom, coordZBlockStairsBottom);
-                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYBlockStairsBottom + 5, coordZBlockStairsTop);
+                        addTunnelSection(chunkTargeted, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
+                        addTunnelSection(chunkTargeted, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
+//                        BlockPos newPosStairBottom = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
+//                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYStairsBottom + 5, coordZBlockStairsTop);
+//
+//                        chunkTargeted.setBlockState(newPosStairBottom, clearGlass.defaultBlockState(), true); //techo
+//                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
             
-                        chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
-                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
-            
-                        coordZBlockStairsBottom--;
+                        coordZStairsBottom--;
                         coordZBlockStairsTop--;
-                        //                coordXBlockStairs; //SE QUEDA IGUAL
+                        //  coordXBlockStairs; //SE QUEDA IGUAL
             
                         for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                            BlockPos newPosWallRight = new BlockPos(coordXBlockWallRightSouth, coordYBlockWall, coordZBlockWall);
-                            BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeftSouth, coordYBlockWall, coordZBlockWall);
+                            addTunnelSection(chunkTargeted, greenGlass.defaultBlockState(), coordXBlockWallRightSouth, coordYWall, coordZWall); //RIGHT WALL
+                            addTunnelSection(chunkTargeted, orangeGlass.defaultBlockState(), coordXBlockWallLeftSouth, coordYWall, coordZWall); //LEFT WALL
+
+//                            BlockPos newPosWallRight = new BlockPos(coordXBlockWallRightSouth, coordYWall, coordZWall);
+//                            BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeftSouth, coordYWall, coordZWall);
+//
+//                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
+//                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlass.defaultBlockState(), true);
                 
-                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
-                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
                 
-                
-                            coordYBlockWall++;
+                            coordYWall++;
                         }
-                        coordYBlockWall -= 5;
+                        coordYWall -= 5;
             
-                        coordZBlockWall--; //valido para pared izquierda y derecha
+                        coordZWall--; //valido para pared izquierda y derecha
                         //   coordXBlockWallLeftSouth; NO CAMBIA MAS QUE 1 VEZ
                         //    coordXBlockWallRightSouth;
 //                  --------------------------------------------------------------------------------------------------------------------------------------------
             
                     } else if (facing.toString().equals("east")) {
-                        BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom, coordZBlockStairsBottom);
-                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYBlockStairsBottom + 5, coordZBlockStairsTop);
+                        addTunnelSection(chunkTargeted, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
+                        addTunnelSection(chunkTargeted, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
+//                        BlockPos newPosStairBottom = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
+//                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYStairsBottom + 5, coordZBlockStairsTop);
+//
+//                        chunkTargeted.setBlockState(newPosStairBottom, clearGlass.defaultBlockState(), true); //techo
+//                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
             
-                        chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
-                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
-            
-                        coordXBlockStairsBottom++;
+                        coordXStairsBottom++;
                         coordXBlockStairsTop++;
-//                      coordZBlockWall; //SE QUEDA IGUAL
+//                      coordZWall; //SE QUEDA IGUAL
             
                         for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                            BlockPos newPosWallRight = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallRightWest);
-                            BlockPos newPosWallLeft = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallLeftWest);
-    
-                            añadirSecciónTunel(chunkTargeted, newPosWallRight, greenGlass.defaultBlockState());
-                            añadirSecciónTunel(chunkTargeted, newPosWallLeft, greenGlass.defaultBlockState());
+                             addTunnelSection(chunkTargeted, greenGlass.defaultBlockState(), coordXWall, coordYWall, coordZBlockWallRightWest); //RIGHT WALL
+                             addTunnelSection(chunkTargeted, orangeGlass.defaultBlockState(), coordXWall, coordYWall, coordZBlockWallLeftWest); //LEFT WALL
+//                            BlockPos newPosWallRight = new BlockPos(coordXWall, coordYWall, coordZBlockWallRightWest);
+//                            BlockPos newPosWallLeft = new BlockPos(coordXWall, coordYWall, coordZBlockWallLeftWest);
+//
 //                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
-//                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
+//                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlass.defaultBlockState(), true);
                 
-                            coordYBlockWall++;
+                            coordYWall++;
                         }
-                        coordYBlockWall -= 5;
+                        coordYWall -= 5;
             
                         //   coordZBlockWallLeftWest;
                         //   coordZBlockWallRightWest;
-                        coordXBlockWall++;
+                        coordXWall++;
                     }
-                    coordYBlockStairsBottom--; //las escaleras siempre bajan 1 en altura, tanto en el suelo como en el techo
-                    coordYBlockWall--; //las paredes tambien van bajando 1 en altura siempre, a la par que las escaleras
+                    coordYStairsBottom--; //las escaleras siempre bajan 1 en altura, tanto en el suelo como en el techo
+                    coordYWall--; //las paredes tambien van bajando 1 en altura siempre, a la par que las escaleras
                 }
 //              --------------------------------------------------------------------------------------------------------------------------------------------
                 
-                coordYBlockStairsBottom--;
+                coordYStairsBottom--;
             }
         }
         
     }
     
-//    /**
-//     * Este método te añadirá un bloque más en las 4 partes del tunel: escalones, techo, pared derecha y pared izquierda
-//     * (llamar a este método hasta terminar de cubrir toda la longitud del tunel)
-//     * @param chunkTargeted
-//     * @param newPos
-//     * @param newBlock
-//     */
-//    public void añadirSecciónTunel(ChunkAccess chunkTargeted, BlockPos newPos, BlockState newBlock){
-//        chunkTargeted.setBlockState(newPos, newBlock, true);
-//    }
+    /**
+     * Este método te añadirá un bloque más en las 4 partes del tunel: escalones, techo, pared derecha y pared izquierda
+     * (llamar a este método hasta terminar de cubrir toda la longitud del tunel)
+     * 
+     * @param chunkTargeted - posición del chunk al que pertenece el targeted block
+     * @param newBlock - el bloque al que quieres transformar el selectedBlock 
+     * @param coordX - coordenada x del bloque que quieres transformar
+     * @param coordY - coordenada y del bloque que quieres transformar
+     * @param coordZ - coordenada z del bloque que quieres transformar
+     */
+    public void addTunnelSection(ChunkAccess chunkTargeted, BlockState newBlock, int coordX, int coordY, int coordZ){
+        BlockPos newPos = new BlockPos(coordX, coordY, coordZ);
+        chunkTargeted.setBlockState(newPos, newBlock,true);
+    }
       
 
 //    }
