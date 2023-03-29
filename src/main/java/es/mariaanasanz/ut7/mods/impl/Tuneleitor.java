@@ -202,9 +202,9 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         BlockPos targetedBlockPos = new BlockPos(pos.getX(),pos.getY(),pos.getZ());
         BlockState state = event.getLevel().getBlockState(pos);
         Block targetedBlock = state.getBlock();
-        ChunkAccess chunkTargeted = event.getLevel().getChunk(targetedBlockPos);
+//        ChunkAccess chunkTargeted = event.getLevel().getChunk(targetedBlockPos);
         Player player = event.getEntity();
-        BlockState blockStandingOn = player.getBlockStateOn();
+//        BlockState blockStandingOn = player.getBlockStateOn();
         
         //Bloques y herramientas:
         Block grassBlock = Blocks.GRASS_BLOCK;
@@ -251,17 +251,16 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
     
         if(event.getItemStack().getItem().toString().trim().endsWith("pickaxe")) { //si la herramienta empleada es un pico
             if (targetedBlock.equals(grassBlock)) { //si se ha usado un pico sobre un bloque de hierva
-//            for (int i = coordYStairsBottom; i >= 5; i--) {
-                while (coordYStairsBottom != 5) { //parar de generar el tunel en la coordenada Y = 5 (jugador debe usar pico en un bloque que esté por encima para que se genere el tunel)
+//                for (int k = coordYStairsBottom; k >= 5; k--) {
+                while (coordYStairsBottom >= 5) { //parar de generar el tunel en la coordenada Y = 5 (jugador debe usar pico en un bloque que esté por encima para que se genere el tunel)
 //                  --------------------------------------------------------------------------------------------------------------------------------------------
                     if (facing.toString().equals("south")) { //genera tunel hacia el sur (aka, where ur facing)
-                        System.out.println("A new SOUTH tunnel has been created.");
+//                        System.out.println("A new SOUTH tunnel has been created.");
                         
                         addTunnelSection(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
                         addTunnelSection(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
                         
                         addTunnelSection(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
-    
                         for (int i = 2; i <=4 ; i++) {
                             addTunnelSection(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
                         }
@@ -301,11 +300,17 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                         //  coordXBlockWallRightNorth;
 //                  --------------------------------------------------------------------------------------------------------------------------------------------
                     } else if (facing.toString().equals("west")) {
-                        System.out.println("A new WEST tunnel has been created.");
+//                        System.out.println("A new WEST tunnel has been created.");
                         
                         addTunnelSection(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
                         addTunnelSection(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
-                        
+    
+                        addTunnelSection(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
+                        for (int i = 2; i <=4 ; i++) {
+                            addTunnelSection(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
+                        }
+
+
 //                        BlockPos newPosStairBottom = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
 //                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYStairsBottom + 5, coordZBlockStairsTop);
 //
@@ -335,10 +340,16 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                         coordXWall--; //valido para pared izquierda y derecha
 //                  --------------------------------------------------------------------------------------------------------------------------------------------
                     } else if (facing.toString().equals("north")) {
-                        System.out.println("A new NORTH tunnel has been created.");
+//                        System.out.println("A new NORTH tunnel has been created.");
                         
                         addTunnelSection(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
                         addTunnelSection(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
+    
+                        addTunnelSection(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
+                        for (int i = 2; i <=4 ; i++) {
+                            addTunnelSection(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
+                        }
+
 //                        BlockPos newPosStairBottom = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
 //                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYStairsBottom + 5, coordZBlockStairsTop);
 //
@@ -369,10 +380,16 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
 //                  --------------------------------------------------------------------------------------------------------------------------------------------
             
                     } else if (facing.toString().equals("east")) {
-                        System.out.println("A new EAST tunnel has been created.");
+//                        System.out.println("A new EAST tunnel has been created.");
     
                         addTunnelSection(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
                         addTunnelSection(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
+                        
+                        addTunnelSection(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
+                        for (int i = 2; i <=4 ; i++) {
+                            addTunnelSection(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
+                        }
+
 //                        BlockPos newPosStairBottom = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
 //                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYStairsBottom + 5, coordZBlockStairsTop);
 //
@@ -405,7 +422,7 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                 }
 //              --------------------------------------------------------------------------------------------------------------------------------------------
                 
-                coordYStairsBottom--;
+//                coordYStairsBottom--;
             }
         }
         
