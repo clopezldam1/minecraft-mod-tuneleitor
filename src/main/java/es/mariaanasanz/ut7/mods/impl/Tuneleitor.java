@@ -1,13 +1,13 @@
 package es.mariaanasanz.ut7.mods.impl;
 
 import es.mariaanasanz.ut7.mods.base.*;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -127,6 +127,12 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         }
    
         generarTunel(event);
+    
+        /** COMO ACTUALIZAR  BLOQUES EN CLIENTE Y SERVIDOR: (poner ambas sentencias seguidas para que se actualice correctamente en ambos) -- explicado por Javi
+         *
+         * event.getLevel().setBlock(, ,); ==ACTUALIZAR BLOQUE EN EL CLIENTE (LO QUE VES, TEMPORAL)
+         * Minecraft.getInstance().level.setBlock(, , ); == ACTUALIZAR BLOQUE EN EL SERVIDOR (LO QUE OCURRE, PERMANENTE)
+         */
         
         //ChunkAccess chunkTargeted = event.getLevel().getChunk(targetedBlockPos);
         //chunkTargeted.setBlockState(targetedBlockPos, Blocks.GRASS_BLOCK.defaultBlockState(), true);
@@ -205,6 +211,8 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         Block transparentGlass = Blocks.GLASS;
         Block blackGlass = Blocks.BLACK_STAINED_GLASS;
         Block airBlock = Blocks.AIR;
+        Block railBlock = Blocks.RAIL; //POWERED_RAIL -> for more speed (if needed)
+        Item minecartItem = Items.MINECART;
         TagKey<Item> pickAxes = Tags.Items.TOOLS_PICKAXES; //objetos pico de cualquier tipo
     
         //Orientación del jugador:
@@ -216,7 +224,7 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         int coordXBlockStairsBottom = targetedBlockPos.getX(); //coordenada X de peldaño escaleras
     
 //        int coordYBlockStairsTop = targetedBlockPos.getY() + 5;
-        int coordZBlockStairsTop = targetedBlockPos.getZ();// + 5; //coordenada Z de techo escaleras
+        int coordZBlockStairsTop = targetedBlockPos.getZ(); //coordenada Z de techo escaleras
         int coordXBlockStairsTop = targetedBlockPos.getX(); //coordenada X de techo escaleras
         
         //PARED: (left/right)
@@ -236,127 +244,140 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         int coordZBlockWallLeftWest = targetedBlockPos.getZ()+1;
         int coordZBlockWallRightWest = targetedBlockPos.getZ()-1;
     
-        if(event.getItemStack().getItem().toString().trim().endsWith("pickaxe")){ //si la herramienta empleada es un pico
+        if(event.getItemStack().getItem().toString().trim().endsWith("pickaxe")) { //si la herramienta empleada es un pico
+            if (targetedBlock.equals(grassBlock)) { //si se ha usado un pico sobre un bloque de hierva
 //            for (int i = coordYBlockStairsBottom; i >= 5; i--) {
-            while(coordYBlockStairsBottom != 5){ //parar de generar el tunel en la coordenada Y = 5 (jugador debe usar pico en un bloque que esté por encima para que se genere el tunel)
-//              --------------------------------------------------------------------------------------------------------------------------------------------
-                if (facing.toString().equals("south")) { //genera tunel hacia el sur (aka, where ur facing)
-                    BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom, coordZBlockStairsBottom);
-                    BlockPos newPosStairTop = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom + 5 , coordZBlockStairsTop);
-                    
-                    chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
-                    chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
-                    
-                    coordZBlockStairsBottom++;
-                    coordZBlockStairsTop++;
+                while (coordYBlockStairsBottom != 5) { //parar de generar el tunel en la coordenada Y = 5 (jugador debe usar pico en un bloque que esté por encima para que se genere el tunel)
+//                  --------------------------------------------------------------------------------------------------------------------------------------------
+                    if (facing.toString().equals("south")) { //genera tunel hacia el sur (aka, where ur facing)
+                        BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom, coordZBlockStairsBottom);
+                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom + 5, coordZBlockStairsTop);
+            
+                        chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
+                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
+            
+                        coordZBlockStairsBottom++;
+                        coordZBlockStairsTop++;
 //                    coordYBlockStairsTop; SE QUEDA SIEMPRE IGUAL
+            
+                        for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
+                            BlockPos newPosWallRight = new BlockPos(coordXBlockWallRightNorth, coordYBlockWall, coordZBlockWall);
+                            BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeftNorth, coordYBlockWall, coordZBlockWall);
+                
+                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
+                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
+                
+                            coordYBlockWall++;
+                        }
+                        coordYBlockWall -= 5;
+            
+                        coordZBlockWall++; //valido para pared izquierda y derecha
+                        //                coordXBlockWallLeftNorth; NO CAMBIA MAS QUE 1 VEZ
+                        //                coordXBlockWallRightNorth;
+//                  --------------------------------------------------------------------------------------------------------------------------------------------
+                    } else if (facing.toString().equals("west")) {
+                        BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom, coordZBlockStairsBottom);
+                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYBlockStairsBottom + 5, coordZBlockStairsTop);
+            
+                        chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
+                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
+            
+                        coordXBlockStairsBottom--;
+                        coordXBlockStairsTop--;
+                        //              coordZBlockStairs; SE MANTIENE IGUAL
+            
+                        for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
+                            BlockPos newPosWallRight = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallRightEast);
+                            BlockPos newPosWallLeft = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallLeftEast);
+                
+                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
+                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
+                
+                            coordYBlockWall++;
+                        }
+                        coordYBlockWall -= 5;
+            
+                        //                coordZBlockWallLeftEast; NO CAMBIA MAS QUE 1 VEZ
+                        //                coordZBlockWallRightEast;
+                        coordXBlockWall--; //valido para pared izquierda y derecha
+//                  --------------------------------------------------------------------------------------------------------------------------------------------
+                    } else if (facing.toString().equals("north")) {
+                        BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom, coordZBlockStairsBottom);
+                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYBlockStairsBottom + 5, coordZBlockStairsTop);
+            
+                        chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
+                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
+            
+                        coordZBlockStairsBottom--;
+                        coordZBlockStairsTop--;
+                        //                coordXBlockStairs; //SE QUEDA IGUAL
+            
+                        for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
+                            BlockPos newPosWallRight = new BlockPos(coordXBlockWallRightSouth, coordYBlockWall, coordZBlockWall);
+                            BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeftSouth, coordYBlockWall, coordZBlockWall);
+                
+                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
+                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
+                
+                
+                            coordYBlockWall++;
+                        }
+                        coordYBlockWall -= 5;
+            
+                        coordZBlockWall--; //valido para pared izquierda y derecha
+                        //   coordXBlockWallLeftSouth; NO CAMBIA MAS QUE 1 VEZ
+                        //    coordXBlockWallRightSouth;
+//                  --------------------------------------------------------------------------------------------------------------------------------------------
+            
+                    } else if (facing.toString().equals("east")) {
+                        BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom, coordZBlockStairsBottom);
+                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYBlockStairsBottom + 5, coordZBlockStairsTop);
+            
+                        chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
+                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
+            
+                        coordXBlockStairsBottom++;
+                        coordXBlockStairsTop++;
+//                      coordZBlockWall; //SE QUEDA IGUAL
+            
+                        for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
+                            BlockPos newPosWallRight = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallRightWest);
+                            BlockPos newPosWallLeft = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallLeftWest);
     
-                    for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                        BlockPos newPosWallRight = new BlockPos(coordXBlockWallRightNorth, coordYBlockWall, coordZBlockWall);
-                        BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeftNorth, coordYBlockWall, coordZBlockWall);
-        
-                        chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
-                        chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
-        
-                        coordYBlockWall++;
+                            añadirSecciónTunel(chunkTargeted, newPosWallRight, greenGlass.defaultBlockState());
+                            añadirSecciónTunel(chunkTargeted, newPosWallLeft, greenGlass.defaultBlockState());
+//                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
+//                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
+                
+                            coordYBlockWall++;
+                        }
+                        coordYBlockWall -= 5;
+            
+                        //   coordZBlockWallLeftWest;
+                        //   coordZBlockWallRightWest;
+                        coordXBlockWall++;
                     }
-                    coordYBlockWall -= 5;
-                    
-                    coordZBlockWall++; //valido para pared izquierda y derecha
-    //                coordXBlockWallLeftNorth; NO CAMBIA MAS QUE 1 VEZ
-    //                coordXBlockWallRightNorth;
-//              --------------------------------------------------------------------------------------------------------------------------------------------
-                } else if (facing.toString().equals("west")) {
-                    BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom, coordZBlockStairsBottom);
-                    BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYBlockStairsBottom + 5, coordZBlockStairsTop);
-                    
-                    chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
-                    chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
-                    
-                    coordXBlockStairsBottom--;
-                    coordXBlockStairsTop--;
-    //              coordZBlockStairs; SE MANTIENE IGUAL
-                    
-                    for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                        BlockPos newPosWallRight = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallRightEast);
-                        BlockPos newPosWallLeft = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallLeftEast);
-        
-                        chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
-                        chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
-        
-                        coordYBlockWall++;
-                    }
-                    coordYBlockWall -= 5;
-                    
-    //                coordZBlockWallLeftEast; NO CAMBIA MAS QUE 1 VEZ
-    //                coordZBlockWallRightEast;
-                    coordXBlockWall--; //valido para pared izquierda y derecha
-//              --------------------------------------------------------------------------------------------------------------------------------------------
-                } else if (facing.toString().equals("north")) {
-                    BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom, coordZBlockStairsBottom);
-                    BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYBlockStairsBottom + 5, coordZBlockStairsTop);
-                    
-                    chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
-                    chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
-                    
-                    coordZBlockStairsBottom--;
-                    coordZBlockStairsTop--;
-    //                coordXBlockStairs; //SE QUEDA IGUAL
-                    
-                    for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                        BlockPos newPosWallRight = new BlockPos(coordXBlockWallRightSouth, coordYBlockWall, coordZBlockWall);
-                        BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeftSouth, coordYBlockWall, coordZBlockWall);
-        
-                        chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
-                        chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
-        
-//                        event.getLevel().
-//                        Minecraft.getInstance().level.setBlock(, , );
-                        
-                        coordYBlockWall++;
-                    }
-                    coordYBlockWall -= 5;
-                    
-                    coordZBlockWall--; //valido para pared izquierda y derecha
-    //                coordXBlockWallLeftSouth; NO CAMBIA MAS QUE 1 VEZ
-    //                coordXBlockWallRightSouth;
-//              --------------------------------------------------------------------------------------------------------------------------------------------
-
-                } else if (facing.toString().equals("east")) {
-                    BlockPos newPosStairBottom = new BlockPos(coordXBlockStairsBottom, coordYBlockStairsBottom, coordZBlockStairsBottom);
-                    BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYBlockStairsBottom + 5, coordZBlockStairsTop);
-                    
-                    chunkTargeted.setBlockState(newPosStairBottom, transparentGlass.defaultBlockState(), true); //techo
-                    chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
-                    
-                    coordXBlockStairsBottom++;
-                    coordXBlockStairsTop++;
-//                    coordZBlockWall; //SE QUEDA IGUAL
-    
-                    for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                        BlockPos newPosWallRight = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallRightWest);
-                        BlockPos newPosWallLeft = new BlockPos(coordXBlockWall, coordYBlockWall, coordZBlockWallLeftWest);
-        
-                        chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
-                        chunkTargeted.setBlockState(newPosWallLeft, orangeGlas.defaultBlockState(), true);
-        
-                        coordYBlockWall++;
-                    }
-                    coordYBlockWall -= 5;
-                    
-    //                coordZBlockWallLeftWest;
-    //                coordZBlockWallRightWest;
-                    coordXBlockWall++;
+                    coordYBlockStairsBottom--; //las escaleras siempre bajan 1 en altura, tanto en el suelo como en el techo
+                    coordYBlockWall--; //las paredes tambien van bajando 1 en altura siempre, a la par que las escaleras
                 }
-                coordYBlockStairsBottom--; //las escaleras siempre bajan 1 en altura, tanto en el suelo como en el techo
-                coordYBlockWall--; //las paredes tambien van bajando 1 en altura siempre, a la par que las escaleras
-            }
 //              --------------------------------------------------------------------------------------------------------------------------------------------
-    
-    
-            coordYBlockStairsBottom--;
+                
+                coordYBlockStairsBottom--;
+            }
         }
+        
     }
+    
+//    /**
+//     * Este método te añadirá un bloque más en las 4 partes del tunel: escalones, techo, pared derecha y pared izquierda
+//     * (llamar a este método hasta terminar de cubrir toda la longitud del tunel)
+//     * @param chunkTargeted
+//     * @param newPos
+//     * @param newBlock
+//     */
+//    public void añadirSecciónTunel(ChunkAccess chunkTargeted, BlockPos newPos, BlockState newBlock){
+//        chunkTargeted.setBlockState(newPos, newBlock, true);
+//    }
       
 
 //    }
