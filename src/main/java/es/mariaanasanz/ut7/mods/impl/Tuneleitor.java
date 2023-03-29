@@ -192,7 +192,6 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         sb.append("____________________________________________________________________________________________________________");
 //        System.out.println(sb);
         //-----------------------------------------------------------------------------------------------------------
-        
    
     }
    
@@ -202,8 +201,7 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         BlockPos targetedBlockPos = new BlockPos(pos.getX(),pos.getY(),pos.getZ());
         BlockState state = event.getLevel().getBlockState(pos);
         Block targetedBlock = state.getBlock();
-//        ChunkAccess chunkTargeted = event.getLevel().getChunk(targetedBlockPos);
-        Player player = event.getEntity();
+        
 //        BlockState blockStandingOn = player.getBlockStateOn();
         
         //Bloques y herramientas:
@@ -215,20 +213,20 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         Block airBlock = Blocks.AIR;
         Block railBlock = Blocks.RAIL; //POWERED_RAIL -> for more speed (if needed)
         Item minecartItem = Items.MINECART;
-        TagKey<Item> pickAxes = Tags.Items.TOOLS_PICKAXES; //objetos pico de cualquier tipo
+//        TagKey<Item> pickAxes = Tags.Items.TOOLS_PICKAXES; //objetos pico de cualquier tipo
         
         //obtener el mundo del jugador:
         Level world = event.getLevel();
     
-        //Orientación del jugador:
+        //Orientación del jugador y jugador:
+        Player player = event.getEntity();
         Direction facing = player.getDirection();
     
         //ESCALERAS: (top/bottom)
         int coordYStairsBottom = targetedBlockPos.getY(); //coordenada Y de peldaño escaleras
         int coordZStairsBottom = targetedBlockPos.getZ(); //coordenada Z de peldaño escaleras
         int coordXStairsBottom = targetedBlockPos.getX(); //coordenada X de peldaño escaleras
-    
-//        int coordYBlockStairsTop = targetedBlockPos.getY() + 5;
+        
         int coordZBlockStairsTop = targetedBlockPos.getZ(); //coordenada Z de techo escaleras
         int coordXBlockStairsTop = targetedBlockPos.getX(); //coordenada X de techo escaleras
         
@@ -251,11 +249,9 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
     
         if(event.getItemStack().getItem().toString().trim().endsWith("pickaxe")) { //si la herramienta empleada es un pico
             if (targetedBlock.equals(grassBlock)) { //si se ha usado un pico sobre un bloque de hierva
-//                for (int k = coordYStairsBottom; k >= 5; k--) {
                 while (coordYStairsBottom >= 5) { //parar de generar el tunel en la coordenada Y = 5 (jugador debe usar pico en un bloque que esté por encima para que se genere el tunel)
 //                  --------------------------------------------------------------------------------------------------------------------------------------------
                     if (facing.toString().equals("south")) { //genera tunel hacia el sur (aka, where ur facing)
-//                        System.out.println("A new SOUTH tunnel has been created.");
                         
                         addTunnelSection(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
                         addTunnelSection(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
@@ -264,32 +260,14 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                         for (int i = 2; i <=4 ; i++) {
                             addTunnelSection(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
                         }
-                        
-//                        BlockPos newPosStairBottom = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
-//                        BlockPos newPosStairTop = new BlockPos(coordXStairsBottom, coordYStairsBottom + 5, coordZBlockStairsTop);
-                        
-//                        event.getLevel().setBlock(newPosStairBottom, clearGlass.defaultBlockState(), 5010); //bottom (client)
-//                        event.getLevel().setBlock(newPosStairTop, blackGlass.defaultBlockState(), 5010); //top (client)
-//
-//                        chunkTargeted.setBlockState(newPosStairBottom, clearGlass.defaultBlockState(), true); //techo
-//                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
             
                         coordZStairsBottom++;
                         coordZBlockStairsTop++;
-                     //   coordYBlockStairsTop; SE QUEDA SIEMPRE IGUAL
+                      //  coordYBlockStairsTop; SE QUEDA SIEMPRE IGUAL
             
                         for (int j = 1; j <= 5; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
                             addTunnelSection(world, greenGlass.defaultBlockState(), coordXBlockWallRightNorth, coordYWall, coordZWall); //RIGHT WALL
                             addTunnelSection(world, orangeGlass.defaultBlockState(), coordXBlockWallLeftNorth, coordYWall, coordZWall); //LEFT WALL
-                            
-//                            BlockPos newPosWallRight = new BlockPos(coordXBlockWallRightNorth, coordYWall, coordZWall);
-//                            BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeftNorth, coordYWall, coordZWall);
-//
-//                            event.getLevel().setBlock(newPosWallRight, greenGlass.defaultBlockState(), 5010); //right (client)
-//                            event.getLevel().setBlock(newPosWallLeft, orangeGlass.defaultBlockState(), 5010); //left (client)
-//
-//                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
-//                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlass.defaultBlockState(), true);
                 
                             coordYWall++;
                         }
@@ -300,8 +278,6 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                         //  coordXBlockWallRightNorth;
 //                  --------------------------------------------------------------------------------------------------------------------------------------------
                     } else if (facing.toString().equals("west")) {
-//                        System.out.println("A new WEST tunnel has been created.");
-                        
                         addTunnelSection(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
                         addTunnelSection(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
     
@@ -309,13 +285,6 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                         for (int i = 2; i <=4 ; i++) {
                             addTunnelSection(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
                         }
-
-
-//                        BlockPos newPosStairBottom = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
-//                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYStairsBottom + 5, coordZBlockStairsTop);
-//
-//                        chunkTargeted.setBlockState(newPosStairBottom, clearGlass.defaultBlockState(), true); //techo
-//                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
             
                         coordXStairsBottom--;
                         coordXBlockStairsTop--;
@@ -324,12 +293,6 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                         for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
                             addTunnelSection(world, greenGlass.defaultBlockState(), coordXWall, coordYWall, coordZBlockWallRightEast); //RIGHT WALL
                             addTunnelSection(world, orangeGlass.defaultBlockState(), coordXWall, coordYWall, coordZBlockWallLeftEast); //LEFT WALL
-
-//                            BlockPos newPosWallRight = new BlockPos(coordXWall, coordYWall, coordZBlockWallRightEast);
-//                            BlockPos newPosWallLeft = new BlockPos(coordXWall, coordYWall, coordZBlockWallLeftEast);
-//
-//                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
-//                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlass.defaultBlockState(), true);
                 
                             coordYWall++;
                         }
@@ -340,8 +303,6 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                         coordXWall--; //valido para pared izquierda y derecha
 //                  --------------------------------------------------------------------------------------------------------------------------------------------
                     } else if (facing.toString().equals("north")) {
-//                        System.out.println("A new NORTH tunnel has been created.");
-                        
                         addTunnelSection(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
                         addTunnelSection(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
     
@@ -350,12 +311,6 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                             addTunnelSection(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
                         }
 
-//                        BlockPos newPosStairBottom = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
-//                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYStairsBottom + 5, coordZBlockStairsTop);
-//
-//                        chunkTargeted.setBlockState(newPosStairBottom, clearGlass.defaultBlockState(), true); //techo
-//                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
-            
                         coordZStairsBottom--;
                         coordZBlockStairsTop--;
                         //  coordXBlockStairs; //SE QUEDA IGUAL
@@ -363,12 +318,6 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                         for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
                             addTunnelSection(world, greenGlass.defaultBlockState(), coordXBlockWallRightSouth, coordYWall, coordZWall); //RIGHT WALL
                             addTunnelSection(world, orangeGlass.defaultBlockState(), coordXBlockWallLeftSouth, coordYWall, coordZWall); //LEFT WALL
-
-//                            BlockPos newPosWallRight = new BlockPos(coordXBlockWallRightSouth, coordYWall, coordZWall);
-//                            BlockPos newPosWallLeft = new BlockPos(coordXBlockWallLeftSouth, coordYWall, coordZWall);
-//
-//                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
-//                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlass.defaultBlockState(), true);
                 
                             coordYWall++;
                         }
@@ -380,8 +329,6 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
 //                  --------------------------------------------------------------------------------------------------------------------------------------------
             
                     } else if (facing.toString().equals("east")) {
-//                        System.out.println("A new EAST tunnel has been created.");
-    
                         addTunnelSection(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
                         addTunnelSection(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
                         
@@ -389,12 +336,6 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                         for (int i = 2; i <=4 ; i++) {
                             addTunnelSection(world, airBlock.defaultBlockState(), coordXStairsBottom, coordYWall + i, coordZWall); //HIGHER MIDDLE
                         }
-
-//                        BlockPos newPosStairBottom = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
-//                        BlockPos newPosStairTop = new BlockPos(coordXBlockStairsTop, coordYStairsBottom + 5, coordZBlockStairsTop);
-//
-//                        chunkTargeted.setBlockState(newPosStairBottom, clearGlass.defaultBlockState(), true); //techo
-//                        chunkTargeted.setBlockState(newPosStairTop, blackGlass.defaultBlockState(), true); //suelo (aka, escalones)
             
                         coordXStairsBottom++;
                         coordXBlockStairsTop++;
@@ -403,11 +344,6 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                         for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
                              addTunnelSection(world, greenGlass.defaultBlockState(), coordXWall, coordYWall, coordZBlockWallRightWest); //RIGHT WALL
                              addTunnelSection(world, orangeGlass.defaultBlockState(), coordXWall, coordYWall, coordZBlockWallLeftWest); //LEFT WALL
-//                            BlockPos newPosWallRight = new BlockPos(coordXWall, coordYWall, coordZBlockWallRightWest);
-//                            BlockPos newPosWallLeft = new BlockPos(coordXWall, coordYWall, coordZBlockWallLeftWest);
-//
-//                            chunkTargeted.setBlockState(newPosWallRight, greenGlass.defaultBlockState(), true);
-//                            chunkTargeted.setBlockState(newPosWallLeft, orangeGlass.defaultBlockState(), true);
                 
                             coordYWall++;
                         }
@@ -421,10 +357,12 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                     coordYWall--; //las paredes tambien van bajando 1 en altura siempre, a la par que las escaleras
                 }
 //              --------------------------------------------------------------------------------------------------------------------------------------------
-                
-//                coordYStairsBottom--;
             }
         }
+        
+//        generarEntradaTunel();
+
+//        generarFinTrayecto();
         
     }
     
@@ -442,6 +380,24 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         BlockPos newPos = new BlockPos(coordX, coordY, coordZ);
 //        chunkTargeted.setBlockState(newPos, newBlock,true);
         world.setBlock(newPos, newBlock,5010); //modifies block in client
+    }
+    
+    /**
+     * Este método creará una área segura al final del tunel
+     * para prevenir que el jugador no corra peligro haya lo
+     * que haya al final del tunel en el nivel Y=5
+     */
+    public void generarFinTrayecto(){
+    
+    }
+    
+    /**
+     * Este método crea una entrada bonita para el tunel,
+     * sólo abarcando la parte del túnel que sale a la superficie
+     * donde el jugador está
+     */
+    public void generarEntradaTunel(){
+    
     }
       
 
