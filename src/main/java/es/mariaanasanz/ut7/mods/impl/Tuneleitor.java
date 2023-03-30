@@ -8,6 +8,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Minecart;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -41,20 +42,29 @@ public class Tuneleitor extends DamMod implements IInteractEvent {
         return "Cristina López Lusarreta";
     }
     
+    /**
+     * Con este método vamos a tomar una serie de decisiones en base a lo
+     * ocurrido durante un tipo de evento específico, en este caso,
+     * el de usar una herramienta con la mano sobre un bloque (RightClickBlock).
+     * Según lo que haya ocurrido en el evento, generaremos el túnel o no.
+     *
+     * @param event - el evento que queremos registrar (PlayerInteractEvent.RightClickBlock)
+     */
     @Override
     @SubscribeEvent
     public void onPlayerTouch(PlayerInteractEvent.RightClickBlock event) { //registramos el evento de "usar" herramienta (con cualquier mano)
-        //Variables del evento:
-        BlockPos pos = event.getPos();  //.getY(), .getX(), .getZ()
-        BlockState state = event.getLevel().getBlockState(pos);
-        
         //Bloque afectado por el evento: (targeted block)
+        BlockPos pos = event.getPos();  //.getY(), .getX(), .getZ() --> posición del bloque afectado
+        BlockState state = event.getLevel().getBlockState(pos); // estado del bloque afectado (qué bloque es)
         BlockPos targetedBlockPos = new BlockPos(pos.getX(), pos.getY(), pos.getZ());
-        Block grassBlock = Blocks.GRASS_BLOCK;
         Block targetedBlock = state.getBlock();
         
+        //Otras variables:
+        Item usedItem = event.getItemStack().getItem(); //herramienta empleada en el evento
+        Block grassBlock = Blocks.GRASS_BLOCK; //bloque de hierva
+        
         //Generar túnel si se cumplen las condiciones durante el evento:
-        if (event.getItemStack().getItem().toString().trim().endsWith("pickaxe")) { //si la herramienta empleada es un pico
+        if (usedItem.toString().trim().endsWith("pickaxe")) { //si la herramienta empleada es un pico
             if (targetedBlock.equals(grassBlock) && targetedBlockPos.getY() > 5) { //si se ha usado un pico sobre un bloque de hierva y bloque está por encima de coord.Y = 5
                 generarTunel(event);
             }
@@ -70,7 +80,7 @@ public class Tuneleitor extends DamMod implements IInteractEvent {
      * También, colocará una vagoneta frente al jugador para acelerar el trayecto
      * y reproducirá un efecto de sonido al crear el túnel.
      *
-     * @param event - el evento que fue registrado al usar una herramienta y cumplir las condiciones
+     * @param event - el evento que fue registrado al usar una herramienta (cumpliendo las condiciones)
      */
     public void generarTunel(PlayerInteractEvent.RightClickBlock event) {
         //Posición del bloque afectado: (targeted block during event)
@@ -84,7 +94,7 @@ public class Tuneleitor extends DamMod implements IInteractEvent {
         Block airBlock = Blocks.AIR;
         Block railBlock = Blocks.RAIL; //POWERED_RAIL -> for more speed (if needed)
         
-        //obtener el mundo del jugador:
+        //Obtener el mundo del jugador:
         Level world = event.getLevel();
         
         //Orientación y posición inicial del jugador:
