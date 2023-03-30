@@ -1,8 +1,16 @@
 package es.mariaanasanz.ut7.mods.impl;
 
+import com.mojang.blaze3d.shaders.Effect;
 import es.mariaanasanz.ut7.mods.base.*;
+import net.minecraft.client.resources.sounds.MinecartSoundInstance;
+import net.minecraft.client.resources.sounds.Sound;
+import net.minecraft.client.resources.sounds.SoundEventRegistration;
+import net.minecraft.client.sounds.SoundEngineExecutor;
+import net.minecraft.client.sounds.SoundEventListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Minecart;
@@ -205,14 +213,11 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         Block targetedBlock = state.getBlock();
         
         //Bloques:
-        Block grassBlock = Blocks.GRASS_BLOCK;
-        Block greenGlass = Blocks.GREEN_STAINED_GLASS;
-        Block orangeGlass = Blocks.ORANGE_STAINED_GLASS;
-        Block clearGlass = Blocks.GLASS;
-        Block blackGlass = Blocks.BLACK_STAINED_GLASS;
+        Block whiteStainedGlass = Blocks.WHITE_STAINED_GLASS;
+        Block birchPlanks = Blocks.BIRCH_PLANKS;
+        Block seaLantern = Blocks.SEA_LANTERN;
         Block airBlock = Blocks.AIR;
         Block railBlock = Blocks.RAIL; //POWERED_RAIL -> for more speed (if needed)
-//        TagKey<Item> pickAxes = Tags.Items.TOOLS_PICKAXES; //objetos pico de cualquier tipo
         
         //obtener el mundo del jugador:
         Level world = event.getLevel();
@@ -220,7 +225,6 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         //Orientación del jugador (and other player-related things):
         Player player = event.getEntity();
         Direction facing = player.getDirection();
-        BlockState blockStandingOn = player.getBlockStateOn();
         BlockPos blockStandingOnPos = player.getOnPos();
     
         //ESCALERAS: (top/bottom)
@@ -240,12 +244,17 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         BlockPos minecartPos = targetedBlockPos.above();
         colocarVagoneta(world, minecartPos);
         
+        //Reproducir un sonido al generar túnel:
+        SoundEvent generarTunelSound = SoundEvents.UI_TOAST_CHALLENGE_COMPLETE; //aka, Minecraft Rare Achievement Sound Effect
+        player.playSound(generarTunelSound);
+        
         //Generar túnel:
-        while (coordYStairsBottom >= 5) { //parar de generar el tunel en la coordenada Y = 5 (jugador debe usar pico en un bloque que esté por encima de Y=5 para que se genere el tunel)
+        while (coordYStairsBottom >= 5) { //parar de generar el tunel en la coordenada Y = 5
+//           ------------------------------------------------------------------------------------------------------------------------------------------------------------
             if (facing.toString().equals("south")) { //genera tunel hacia el sur (aka, where ur facing)
                 
-                addBlock(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
-                addBlock(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
+                addBlock(world, birchPlanks.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
+                addBlock(world, seaLantern.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
                 
                 addBlock(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
                 for (int i = 2; i <=4 ; i++) {
@@ -256,18 +265,18 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                 coordZBlockStairsTop++;
                 
                 for (int j = 1; j <= 5; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                    addBlock(world, greenGlass.defaultBlockState(), coordXWall-1, coordYWall, coordZWall); //RIGHT WALL
-                    addBlock(world, orangeGlass.defaultBlockState(), coordXWall+1, coordYWall, coordZWall); //LEFT WALL
+                    addBlock(world, whiteStainedGlass.defaultBlockState(), coordXWall-1, coordYWall, coordZWall); //RIGHT WALL
+                    addBlock(world, whiteStainedGlass.defaultBlockState(), coordXWall+1, coordYWall, coordZWall); //LEFT WALL
         
                     coordYWall++;
                 }
                 coordYWall -= 5;
     
                 coordZWall++;
-                
-            } else if (facing.toString().equals("west")) {
-                addBlock(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
-                addBlock(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
+//           ------------------------------------------------------------------------------------------------------------------------------------------------------------
+            } else if (facing.toString().equals("west")) { //genera túnel hacia el west
+                addBlock(world, birchPlanks.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
+                addBlock(world, seaLantern.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
 
                 addBlock(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
                 for (int i = 2; i <=4 ; i++) {
@@ -278,18 +287,18 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                 coordXBlockStairsTop--;
     
                 for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                    addBlock(world, greenGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall-1); //RIGHT WALL
-                    addBlock(world, orangeGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall+1); //LEFT WALL
+                    addBlock(world, whiteStainedGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall-1); //RIGHT WALL
+                    addBlock(world, whiteStainedGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall+1); //LEFT WALL
         
                     coordYWall++;
                 }
                 coordYWall -= 5;
                 
                 coordXWall--;
-                
-            } else if (facing.toString().equals("north")) {
-                addBlock(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
-                addBlock(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
+//           ------------------------------------------------------------------------------------------------------------------------------------------------------------
+            } else if (facing.toString().equals("north")) { //genera túnel hacia el north
+                addBlock(world, birchPlanks.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
+                addBlock(world, seaLantern.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
 
                 addBlock(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
                 for (int i = 2; i <=4 ; i++) {
@@ -300,18 +309,18 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                 coordZBlockStairsTop--;
 
                 for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                    addBlock(world, greenGlass.defaultBlockState(), coordXWall+1, coordYWall, coordZWall); //RIGHT WALL
-                    addBlock(world, orangeGlass.defaultBlockState(), coordXWall-1, coordYWall, coordZWall); //LEFT WALL
+                    addBlock(world, whiteStainedGlass.defaultBlockState(), coordXWall+1, coordYWall, coordZWall); //RIGHT WALL
+                    addBlock(world, whiteStainedGlass.defaultBlockState(), coordXWall-1, coordYWall, coordZWall); //LEFT WALL
         
                     coordYWall++;
                 }
                 coordYWall -= 5;
     
                 coordZWall--;
-    
-            } else if (facing.toString().equals("east")) {
-                addBlock(world, clearGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
-                addBlock(world, blackGlass.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
+//           ------------------------------------------------------------------------------------------------------------------------------------------------------------
+            } else if (facing.toString().equals("east")) { //genera túnel hacia el east
+                addBlock(world, birchPlanks.defaultBlockState(), coordXStairsBottom, coordYStairsBottom, coordZStairsBottom); //BOTTOM
+                addBlock(world, seaLantern.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 5, coordZStairsBottom); //TOP
                 
                 addBlock(world, railBlock.defaultBlockState(), coordXStairsBottom, coordYStairsBottom + 1, coordZStairsBottom); //LOWER MIDDLE
                 for (int i = 2; i <=4 ; i++) {
@@ -322,8 +331,8 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                 coordXBlockStairsTop++;
     
                 for (int j = 0; j <= 4; j++) { //quiero que ponga 5 bloques más porque empiezo desde la esquina inferior exterior, al ras de los escalones
-                     addBlock(world, greenGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall+1); //RIGHT WALL
-                     addBlock(world, orangeGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall-1); //LEFT WALL
+                     addBlock(world, whiteStainedGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall+1); //RIGHT WALL
+                     addBlock(world, whiteStainedGlass.defaultBlockState(), coordXWall, coordYWall, coordZWall-1); //LEFT WALL
         
                     coordYWall++;
                 }
@@ -331,15 +340,16 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
                 
                 coordXWall++;
             }
+//           ------------------------------------------------------------------------------------------------------------------------------------------------------------
             
             coordYStairsBottom--; //las escaleras siempre bajan 1 en altura, tanto en el suelo como en el techo
             coordYWall--; //las paredes tambien van bajando 1 en altura siempre, a la par que las escaleras
         }
         
-//        generarEntradaTunel(facing, world, blockStandingOnPos);
-//
-//        BlockPos lastTunnelBlockPos = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
-//        generarFinTrayecto(facing, world, lastTunnelBlockPos);
+        generarEntradaTunel(facing, world, blockStandingOnPos);
+
+        BlockPos lastTunnelBlockPos = new BlockPos(coordXStairsBottom, coordYStairsBottom, coordZStairsBottom);
+        generarFinTrayecto(facing, world, lastTunnelBlockPos);
     
     }
     
@@ -359,9 +369,14 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
     }
   
     public void colocarVagoneta(Level world, BlockPos minecartPos){
+        //Colocar vagoneta:
         Minecart minecart = EntityType.MINECART.create(world); //crear una vagoneta en el mundo
         minecart.setPos(minecartPos.getX(), minecartPos.getY(), minecartPos.getZ()); //asignar una posición a la vagoneta
         world.addFreshEntity(minecart); //colocar vagoneta creada en el mundo (en la posición que le fue asignada)
+        
+        //Reproducir sonido al colocar vagoneta:
+        SoundEvent minecartPlacedSound = SoundEvents.UI_LOOM_SELECT_PATTERN;
+        minecart.playSound(minecartPlacedSound);
     }
     
     /**
