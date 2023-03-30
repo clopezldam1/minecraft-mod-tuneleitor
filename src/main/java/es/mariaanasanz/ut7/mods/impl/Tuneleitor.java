@@ -3,9 +3,10 @@ package es.mariaanasanz.ut7.mods.impl;
 import es.mariaanasanz.ut7.mods.base.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -203,7 +204,7 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         BlockState state = event.getLevel().getBlockState(pos);
         Block targetedBlock = state.getBlock();
         
-        //Bloques y herramientas:
+        //Bloques:
         Block grassBlock = Blocks.GRASS_BLOCK;
         Block greenGlass = Blocks.GREEN_STAINED_GLASS;
         Block orangeGlass = Blocks.ORANGE_STAINED_GLASS;
@@ -211,7 +212,6 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         Block blackGlass = Blocks.BLACK_STAINED_GLASS;
         Block airBlock = Blocks.AIR;
         Block railBlock = Blocks.RAIL; //POWERED_RAIL -> for more speed (if needed)
-        Item minecartItem = Items.MINECART;
 //        TagKey<Item> pickAxes = Tags.Items.TOOLS_PICKAXES; //objetos pico de cualquier tipo
         
         //obtener el mundo del jugador:
@@ -235,12 +235,12 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         int coordYWall = targetedBlockPos.getY(); //empezamos a construir la pared al ras del escalónn
         int coordXWall = targetedBlockPos.getX();
         int coordZWall = targetedBlockPos.getZ();
-        
-        
-//        colocarVagoneta();
+    
+        //Colocar vagoneta:
         BlockPos minecartPos = targetedBlockPos.above();
+        colocarVagoneta(world, minecartPos);
         
-        
+        //Generar túnel:
         while (coordYStairsBottom >= 5) { //parar de generar el tunel en la coordenada Y = 5 (jugador debe usar pico en un bloque que esté por encima de Y=5 para que se genere el tunel)
             if (facing.toString().equals("south")) { //genera tunel hacia el sur (aka, where ur facing)
                 
@@ -358,6 +358,12 @@ public class Tuneleitor extends DamMod implements IBlockBreakEvent, IServerStart
         world.setBlock(newPos, newBlock,5010); //modifies block in client
     }
   
+    public void colocarVagoneta(Level world, BlockPos minecartPos){
+        Minecart minecart = EntityType.MINECART.create(world); //crear una vagoneta en el mundo
+        minecart.setPos(minecartPos.getX(), minecartPos.getY(), minecartPos.getZ()); //asignar una posición a la vagoneta
+        world.addFreshEntity(minecart); //colocar vagoneta creada en el mundo (en la posición que le fue asignada)
+    }
+    
     /**
      * Este método crea una entrada bonita para el tunel,
      * sólo abarcando la parte del túnel que sale a la superficie
